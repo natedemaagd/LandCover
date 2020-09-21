@@ -1,4 +1,4 @@
-# gls_spatial()
+# gls_spatial
 
 This function will be the first step in creating a landcover-dependent spatial statistical model. Its main arguments are a `data.frame` (`raster`s must be converted and combined into a `data.frame` before the function can be used; see below for an example how to do this), regression formula, spatial coordinates, and landcover information. It runs a `gls` model using the regression formula, and chooses the best spatial correlation structure from `linear`, `Gaussian`, `Ratio`, `Spherical`, and `Exponential` based on model AIC. See `?gls_spatial()` and `?gls()` for full details.
 
