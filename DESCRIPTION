@@ -1,0 +1,16 @@
+Package: LandCover
+Title: Model the Spread of Landcovers and Effect on Water Yield
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Nathan",
+           family = "DeMaagd",
+           role = c("aut", "cre"),
+           email = "nate.demaagd@gmail.com",
+           comment = c(ORCID = 0000-0001-7558-0685))
+Description: This package is intended to model the spread of land covers, and estimate the corresponding effect on water yield and aquifer recharge.
+License: MIT + file LICENSE
+Imports: nlme, doParallel, foreach, parallel
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
