@@ -25,7 +25,7 @@ dat$rain      <- with(dat, ( 0.7*(2*elevation   + 0.5*y - 1.0*x + ifelse(landcov
 ### 1. Starting data
 
 #### 1.1 If you already have a `data.frame`
-Easy! Skip to the next section below where we run the regressions
+Easy! Skip to section 2 below where we run the regressions
 
 #### 1.2 If you are starting with `raster`s
 If you start with `raster`s instead of a `data.frame`, you'll need to convert and merge them into a `data.frame` for the function to work. Suppose you have four rasters, `raster_terrain`, `raster_landcover`, `raster_temp`, and `raster_rain`. Below is the code to convert the `data.frame` above into rasters if you'd like to use rasters with the same data (that is, this doesn't usually have to be done. I'm creating the rasters from the data above).
