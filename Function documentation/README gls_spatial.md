@@ -18,7 +18,7 @@ dat$landcover <- rep(c(1, 2), each = nrow(dat)/2)
 dat$temp      <- with(dat, (-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
 dat$rain      <- with(dat, ( 0.7*(2*elevation   + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 ```
-<img src="Figures/raster_plots.png" alt="raster_plots" width="600">
+<img src="https://github.com/natedemaagd/LandCover/blob/master/Figures/raster_plots.png" alt="raster_plots" width="600">
 
 
 
