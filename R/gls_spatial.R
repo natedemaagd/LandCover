@@ -98,14 +98,8 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
   # get AICs for each land cover
   AICs <- foreach::foreach(i = 1:length(reg_results)) %dopar% {
 
-    # initialize list of AICs
-    AIC_by_corr_type <- list()
-    for(j in 1:length(reg_results[[i]])){
+    sapply(reg_results[[i]], function(lc_results){ ifelse(is.na(lc_results), NA, stats::AIC(lc_results))[[1]]})
 
-      # for each type of correlation type, get AIC
-      AIC_by_corr_type[[j]] <- ifelse(is.na(reg_results[[i]][[j]]), NA, stats::AIC(reg_results[[i]][[j]]))
-
-    }
   }
 
   # get the minimum AIC from each landcover model
