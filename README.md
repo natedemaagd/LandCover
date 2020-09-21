@@ -5,4 +5,4 @@ There are many functions in this package. See the Function Files folder for docu
 
 
 ## Functions list
-1. `gls_spatial` Run a spatial GLS model that chooses the best correlation structure based on model AIC. [Link](https://github.com/natedemaagd/LandCover/blob/master/Function%20documentation/README%20gls_spatial.md) to documentation.
+1. [`gls_spatial`](https://github.com/natedemaagd/LandCover/blob/master/Function%20documentation/README%20gls_spatial.md) Run a spatial GLS model that chooses the best correlation structure based on model AIC.
