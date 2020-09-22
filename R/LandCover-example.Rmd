@@ -26,7 +26,7 @@ File setup. Here we load the packages we'll use in this tutorial, including the 
 knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(42)
-library(LandCover); library(gridExtra)library(ggplot2); library(raster)
+library(LandCover); library(gridExtra); library(ggplot2); library(raster)
 
 ```
 
