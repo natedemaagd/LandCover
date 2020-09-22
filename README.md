@@ -5,4 +5,4 @@ There are many functions in this package. See the [wiki](https://github.com/nate
 
 
 ## Functions list
-1. [`gls_spatial`](https://github.com/natedemaagd/LandCover/wiki/gls_spatial) Run a spatial GLS model that chooses the best correlation structure based on model AIC.
+1. [`gls_spatial`](https://github.com/natedemaagd/LandCover/wiki/gls_spatial) Run a spatial GLS model that chooses the best spatial correlation structure based on model AIC.
