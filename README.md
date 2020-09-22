@@ -5,7 +5,7 @@ There are many functions in this package. See the [wiki](https://github.com/nate
 
 
 ## Installation and usage
-The package in its current state can be installed with the command `devtools::install_github('natedemaagd/LandCover')`. Then, load it like any library using `library(LandCover)`.
+The package in its current state can be installed with the command `devtools::install_github('natedemaagd/LandCover')`. Then, load it like any package using `library(LandCover)`.
 
 
 ## Functions list
