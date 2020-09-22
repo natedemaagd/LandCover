@@ -1,0 +1,136 @@
+---
+title: "LandCover example"
+author: "Nathan DeMaagd"
+date: "9/22/2020"
+output: html_document
+---
+
+
+
+
+
+This markdown file contains all the examples from the LandCover documentation on my GitHub page. It is fully executable and will reproduce all results and figures shown in the examples.
+
+
+
+
+
+
+
+# Initial setup
+
+
+File setup
+
+```{r file setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+set.seed(42)
+library(ggplot2); library(raster); library(LandCover); library(gridExtra)
+
+```
+
+
+
+
+Example data setup
+
+```{r example data setup}
+
+
+# initialize data.frame with coordinates
+dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
+
+
+# create some data: elevation, landcover, and temp/ET dependent on elevation and landcover
+dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
+dat$landcover <- rep(c(1, 2), each = nrow(dat)/2)
+dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
+dat$ET      <- with(dat, ( 0.7*(2*elevation   + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
+
+
+# create plot of variables
+plot_elevation <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = elevation)) + scale_fill_gradientn(colors = terrain.colors(5))             + coord_equal() + labs(title = 'Elevation data')
+plot_temp      <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = temp))      + scale_fill_gradient(low = "green", high = "darkorange")      + coord_equal() + labs(title = 'Temperature data')
+plot_ET        <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = ET))        + scale_fill_gradient(low = "tan", high = "darkblue")          + coord_equal() + labs(title = 'ET data')
+plot_landcover <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = as.character(landcover))) + coord_equal() + labs(title = 'Landcover data') + scale_fill_discrete(name = 'landcover')
+
+plot_grid <- grid.arrange(plot_elevation, plot_temp, plot_ET, plot_landcover, ncol=2)
+
+ggsave(plot = plot_grid, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/raster_plots.png", dpi = 300, width = 6, height = 6)
+
+
+
+
+# if you have rasters, you'll need to first convert to data.frames and combine
+
+# create rasters as an example, using existing data.frames (!!!!skip this in your own data since you already have rasters!!!!)
+raster_terrain   <- rasterFromXYZ(dat[c('x', 'y', 'elevation')])
+raster_landcover <- rasterFromXYZ(dat[c('x', 'y', 'landcover')])
+raster_temp      <- rasterFromXYZ(dat[c('x', 'y', 'temp')])
+raster_ET        <- rasterFromXYZ(dat[c('x', 'y', 'ET')])
+
+# convert rasters to data.frames
+dat_terrain   <- as.data.frame(raster_terrain,   xy = TRUE)
+dat_landcover <- as.data.frame(raster_landcover, xy = TRUE)
+dat_temp      <- as.data.frame(raster_temp,      xy = TRUE)
+dat_ET        <- as.data.frame(raster_ET,        xy = TRUE)
+
+# merge new data.frames by coordinates
+merge_func <- function(x, y)
+  merge(x, y, by=c("x", "y"), all=TRUE)
+
+dat <- Reduce(merge_func, list(dat_terrain, dat_landcover, dat_temp, dat_ET))
+
+rm(merge_func, dat_terrain, dat_landcover, dat_temp, dat_ET)
+
+```
+
+
+
+
+
+
+
+
+
+# Using `gls_spatial()`
+
+```{r using gls_spatial}
+
+
+# run regression
+regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2), reg_formula = ET ~ elevation + temp, error_formula = ~x+y)
+
+# what form of error correlation was chosen for the regressions? Linear for landcover type 1 and Ratio for landcover type 2
+regression_results[[1]]$modelStruct$corStruct
+regression_results[[2]]$modelStruct$corStruct
+
+# print a summary of regression from both landcover types
+summary(regression_results[[1]])
+summary(regression_results[[2]])
+
+
+rm(list=setdiff(ls(), c('dat', 'regression_results')))
+
+```
+
+
+
+
+
+
+
+
+
+# Using `gls_spatial_predict()`
+
+```{r using gls_spatial_predict}
+
+
+### predict with a data.frame
+
+dat$ET_predicted <- gls_spatial_predict(data = dat, reg_results = regression_results, lc = 1, reg_formula = ET ~ elevation + temp)
+
+```
+
