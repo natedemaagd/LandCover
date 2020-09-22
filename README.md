@@ -1,5 +1,5 @@
 # LandCover
-R package to simulate landcover spread and the associated changes to water yield and recharge (or any other landcover-based changes you're interested in)
+R package to simulate landcover spread and the associated changes to water yield and recharge (or any other landcover-based changes you're interested in :bowtie:).
 
 There are many functions in this package. See the wiki for documentation for specific functions, or click a link below. This package is still in development, but can still be installed in `R` using `devtools::install_github('natedemaagd/LandCover')`.
 
