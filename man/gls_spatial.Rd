@@ -51,7 +51,7 @@ Landcovers with large numbers of observations will take a long time to run. It i
 # create data.frame with x,y coordinates, landcover variable, and two covariates
 dat <- data.frame(x = rnorm(100), y = rnorm(100), lc = rep(c('a','b'), each = 5), var1 = rnorm(100), var2 = rnorm(100))
 
-# add a dependent variable
+# add a dependent variable to `dat`
 dat$var3 <- with(dat, var1 + 2*var2 + rnorm(100))
 
 # run the gls model

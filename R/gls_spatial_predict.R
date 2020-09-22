@@ -1,6 +1,6 @@
-#' Run spatial GLS models with optimal spatial correlation structure.
+#' Predict values from `gls_spatial()` output
 #'
-#' This function runs a GLS model on a spatial dataset. It chooses among five types of correlation structure, and returns the model with the lowest AIC.
+#' After creating `gls` object(s) with the `gls_spatial()` function, this will create predicted values of the dependent variable from your regression, for the specified landcovers. Particularly useful once your landcover files have changed and you want to predict what effect this may have on the dependent variable.
 #'
 #' @import nlme doParallel foreach parallel
 #' @importFrom foreach %dopar%
@@ -11,7 +11,7 @@
 #'
 #' @return A vector with predicted values of the dependent variable from gls_spatial()
 #'
-#' @details
+#' @details This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the `reg_results` parameter.
 #'
 #' @examples
 #' # create data.frame with x,y coordinates, landcover variable, and two covariates
