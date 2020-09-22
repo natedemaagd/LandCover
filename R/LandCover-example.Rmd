@@ -20,13 +20,13 @@ This markdown file contains all the examples from the LandCover documentation on
 # Initial setup
 
 
-File setup. Here we load the packages we'll use in this tutorial, including the `LandCover` package. The others are used for plotting figures and working with rasters.
+File setup. Here we load the packages we'll use in this tutorial, including the `LandCover` package. The others are used for plotting figures, working with rasters, and running code in parallel.
 
 ```{r file setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(42)
-library(LandCover); library(gridExtra); library(ggplot2); library(raster)
+library(LandCover); library(gridExtra); library(ggplot2); library(raster); library(foreach)
 
 ```
 
@@ -46,7 +46,7 @@ dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
 dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
 dat$landcover <- rep(c(1, 2), each = nrow(dat)/2)
 dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
-dat$ET      <- with(dat, ( 0.7*(2*elevation   + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
+dat$ET        <- with(dat, ( 0.7*(2*elevation   + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 
 
 # create plot of variables
@@ -147,7 +147,9 @@ dat$ET_predicted <- foreach(i = 1:nrow(dat), .combine = 'c') %dopar% {
 }
 
 
+plot_PredictedVsActual <- ggplot(data = dat, aes(x = ET_predicted - ET)) + geom_histogram()
 
+plot_PredictedVsActual
 
 ```
 
