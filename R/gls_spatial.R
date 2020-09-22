@@ -87,7 +87,7 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
 
     }
 
-    print(paste0('Completed landcover ', landcover_vec[[i]], ' at ', Sys.time()))
+    if(isTRUE(silent)) print(paste0('Completed landcover ', landcover_vec[[i]], ' at ', Sys.time()))
 
   }
 
