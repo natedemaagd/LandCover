@@ -20,20 +20,20 @@ This markdown file contains all the examples from the LandCover documentation on
 # Initial setup
 
 
-File setup
+File setup. Here we load the packages we'll use in this tutorial, including the `LandCover` package. The others are used for plotting figures and working with rasters.
 
 ```{r file setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(42)
-library(ggplot2); library(raster); library(LandCover); library(gridExtra)
+library(LandCover); library(gridExtra)library(ggplot2); library(raster)
 
 ```
 
 
 
 
-Example data setup
+Suppose we have a data.frame with the variables x, y, elevation, landcover, temp, and ET (evapotranspiration). We may be interested in how these variables interact with one another within a given landcover.
 
 ```{r example data setup}
 
@@ -64,13 +64,13 @@ plot_grid
 
 
 
-# if you have rasters, you'll need to first convert to data.frames and combine
+### if you have rasters, you'll need to first convert to data.frames and combine
 
-# create rasters as an example, using existing data.frames (!!!!skip this in your own data since you already have rasters!!!!)
-raster_terrain   <- rasterFromXYZ(dat[c('x', 'y', 'elevation')])
-raster_landcover <- rasterFromXYZ(dat[c('x', 'y', 'landcover')])
-raster_temp      <- rasterFromXYZ(dat[c('x', 'y', 'temp')])
-raster_ET        <- rasterFromXYZ(dat[c('x', 'y', 'ET')])
+     # create rasters as an example, using the existing data created above (!!!!skip this in your own data since you already have rasters!!!!)
+     raster_terrain   <- rasterFromXYZ(dat[c('x', 'y', 'elevation')])
+     raster_landcover <- rasterFromXYZ(dat[c('x', 'y', 'landcover')])
+     raster_temp      <- rasterFromXYZ(dat[c('x', 'y', 'temp')])
+     raster_ET        <- rasterFromXYZ(dat[c('x', 'y', 'ET')])
 
 # convert rasters to data.frames
 dat_terrain   <- as.data.frame(raster_terrain,   xy = TRUE)
@@ -98,6 +98,8 @@ rm(merge_func, dat_terrain, dat_landcover, dat_temp, dat_ET)
 
 # Using `gls_spatial()`
 
+Setting up the data for the example was more complicated than actually running the function once you have a data.frame. To run the function, you'll need to specify, at a minimum, the data, the name of the landcover variable in the data, a vector of specific landcover values for which you want regression results, a regression formula, and the error formula (the coordinates from the data). For our example, let's say we want to test both landcover types, 1 and 2. For each type of landcover, we might be interested in analyzing the relationship between ET, elevation, and temperature. We would set up the function like this:
+
 ```{r using gls_spatial}
 
 
@@ -112,7 +114,7 @@ regression_results[[2]]$modelStruct$corStruct
 summary(regression_results[[1]])
 summary(regression_results[[2]])
 
-
+# we don't need anything other than the data and regression results now, so delete everything other than those two things
 rm(list=setdiff(ls(), c('dat', 'regression_results')))
 
 ```
@@ -132,9 +134,20 @@ Before you get into changing the landcovers and predicting new values, you'll mo
 ```{r using gls_spatial_predict}
 
 
+
+
+##### predict future values of ET
+
+
 # get the expected values of present-day ET, using both types of landcover
-dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 1)
-dat$ET_predicted_lc2 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 2)
+dat$ET_predicted <- foreach(i = 1:nrow(dat), .combine = 'c') %dopar% {
+  
+  gls_spatial_predict(data = dat[i,], reg_results = regression_results, landcover = dat[i,'landcover'])
+  
+}
+
+
+
 
 ```
 
