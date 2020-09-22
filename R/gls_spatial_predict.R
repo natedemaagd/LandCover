@@ -29,7 +29,7 @@
 ### FUNCTION:
 gls_spatial_predict <- function(data, reg_results, lc, reg_formula){
 
-  reg_formula = formula(reg_formula)
+  eval(parse(text=paste0('reg_formula <- formula(reg_formula)')))
 
   predict(object = reg_results[names(reg_results) == as.character(lc)][[1]], newdata = data)
 
