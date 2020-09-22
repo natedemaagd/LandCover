@@ -112,6 +112,11 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
   # rename elements of `reg_results_final` to match the landcover codes
   names(reg_results_final) <- landcover_vec
 
+  # replace `formula(reg_formula)` with the actual formula (needed for `gls_spatial_predict`)
+  for(i in 1:length(reg_results_final)){
+    reg_results_final[[i]]$call[[2]] <- formula(reg_formula)
+  }
+
   # return the regression results
   return(reg_results_final)
 

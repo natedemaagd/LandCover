@@ -26,7 +26,7 @@ File setup
 knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(42)
-library(ggplot2); library(raster); library(LandCover); library(gridExtra)
+library(ggplot2); library(raster); library(LandCover); library(gridExtra); library(foreach)
 
 ```
 
@@ -132,7 +132,7 @@ rm(list=setdiff(ls(), c('dat', 'regression_results')))
 
 ### predict with a data.frame
 
-dat$ET_predicted <- gls_spatial_predict(data = dat, reg_results = regression_results, lc = 1, reg_formula = ET ~ elevation + temp)
+dat$ET_predicted <- gls_spatial_predict(data = dat, reg_results = regression_results, lc = 1)
 
 ```
 
