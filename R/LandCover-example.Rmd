@@ -26,7 +26,7 @@ File setup
 knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(42)
-library(ggplot2); library(raster); library(LandCover); library(gridExtra); library(foreach)
+library(ggplot2); library(raster); library(LandCover); library(gridExtra)
 
 ```
 
@@ -127,12 +127,14 @@ rm(list=setdiff(ls(), c('dat', 'regression_results')))
 
 # Using `gls_spatial_predict()`
 
+Before you get into changing the landcovers and predicting new values, you'll most likely want to get predicted values for your present-day dependent variable. This is because you'll want to compare the *expected* values of today to the *expected* values of the future. If you compare the *true* values of today with the *expected* values of the future, you may get some weird predicted changes that don't make ecological, biological, etc. sense. This could be because of measurement error in the given raster pixel, mis-classification, omitted variables, or any number of reasons.
+
 ```{r using gls_spatial_predict}
 
 
-### predict with a data.frame
-
-dat$ET_predicted <- gls_spatial_predict(data = dat, reg_results = regression_results, lc = 1)
+# get the expected values of present-day ET, using both types of landcover
+dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 1)
+dat$ET_predicted_lc2 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 2)
 
 ```
 

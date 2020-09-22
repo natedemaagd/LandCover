@@ -7,7 +7,7 @@
 #'
 #' @param data `data.frame` with spatial data
 #' @param reg_results object of class `gls` from the `gls_spatial` function
-#' @param lc vector of landcovers for which the new dependent variable values are to be predicted
+#' @param lc value of landcover for which the new dependent variable values are to be predicted
 #'
 #' @return A vector with predicted values of the dependent variable from gls_spatial()
 #'
