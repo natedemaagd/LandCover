@@ -34,7 +34,7 @@
 #' regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2),
 #'                                   reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
 #'
-#' # add vector of predicted values of var3 to the data.frame
+#' # get the expected values of present-day ET, using both types of landcover
 #' dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
 #'
 #' # create raster of predicted values using one landcover type
