@@ -26,7 +26,7 @@ File setup. Here we load the packages we'll use in this tutorial, including the 
 knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(1)
-library(LandCover); library(gridExtra); library(ggplot2); library(raster); library(foreach)
+library(LandCover); library(gridExtra); library(ggplot2); library(raster); library(foreach); library(latex2exp)
 
 ```
 
@@ -149,9 +149,9 @@ dat$ET_predicted <- foreach(i = 1:nrow(dat), .combine = 'c') %dopar% {
 
 # plot difference between actual and predicted values for each landcover type
 plot_PredictedVsActual <- ggplot(data = dat) +
-  geom_histogram(aes(x = ET_predicted - ET, fill = as.character(landcover), color = as.character(landcover)), alpha = 0.5, bins = 40) +
+  geom_histogram(aes(x = ET - ET_predicted, fill = as.character(landcover), color = as.character(landcover)), alpha = 0.5, bins = 40) +
   geom_vline(xintercept = 0, linetype = 'longdash') +
-  labs(x = 'E(ET) - ET', y = 'Number of pixels', fill = 'Landcover', color = 'Landcover')
+  labs(x = TeX('$ET - \\widehat{ET}$'), y = 'Number of pixels', fill = 'Landcover', color = 'Landcover')
 
 plot_PredictedVsActual
 
