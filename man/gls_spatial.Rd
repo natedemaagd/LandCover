@@ -48,13 +48,20 @@ This function runs a GLS model on a spatial dataset. It chooses among five types
 Landcovers with large numbers of observations will take a long time to run. It is strongly recommended to use 5 cores in parallel. The code runs the landcover types sequentially, and the spatial GLS models for each landcover in parallel. The function will output the landcover and time of completion as it progresses, unless \code{silent = TRUE}. If there are too many observations for your system, you must take a representative subset. Each list element in the output corresponds to a landcover type. The objects are of class \code{gls} and will report the correlation structure that resulted in the lowest model AIC. If an element in the output list is \code{NA}, the log likelihood model failed to converge using all correlation structures. Try increasing the number of iterations or increasing the tolerance.
 }
 \examples{
-# create data.frame with x,y coordinates, landcover variable, and two covariates
-dat <- data.frame(x = rnorm(100), y = rnorm(100), lc = rep(c('a','b'), each = 5), var1 = rnorm(100), var2 = rnorm(100))
+# load packages
+library(LandCover); library(foreach)
 
-# add a dependent variable to `dat`
-dat$var3 <- with(dat, var1 + 2*var2 + rnorm(100))
+# initialize data.frame with coordinates
+dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
+
+# create some data: elevation, landcover, and temp/ET dependent on elevation and landcover
+dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
+dat$landcover <- ifelse(dat$elevation < median(dat$elevation), 1, 2)
+dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
+dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 
 # run the gls model
-gls_results <- gls_spatial(data = dat, landcover_varname = 'lc', landcover_vec = c('a', 'b'), reg_formula = var3 ~ var1 + var2, error_formula = ~x+y)
+regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2),
+                                  reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
 
 }

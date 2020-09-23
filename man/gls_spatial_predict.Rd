@@ -4,7 +4,14 @@
 \alias{gls_spatial_predict}
 \title{Predict values from \code{gls_spatial()} output}
 \usage{
-gls_spatial_predict(data, reg_results, landcover)
+gls_spatial_predict(
+  data,
+  reg_results,
+  landcover,
+  return_raster = FALSE,
+  x_coords = NULL,
+  y_coords = NULL
+)
 }
 \arguments{
 \item{data}{\code{data.frame} with spatial data}
@@ -23,16 +30,28 @@ After creating \code{gls} object(s) with the \code{gls_spatial()} function, this
 This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the \code{reg_results} parameter.
 }
 \examples{
-# create data.frame with x,y coordinates, landcover variable, and two covariates
-dat <- data.frame(x = rnorm(100), y = rnorm(100), lc = rep(c('a','b'), each = 5), var1 = rnorm(100), var2 = rnorm(100))
+# load packages
+library(LandCover); library(foreach); library(raster)
 
-# add a dependent variable to `dat`
-dat$var3 <- with(dat, var1 + 2*var2 + rnorm(100))
+# initialize data.frame with coordinates
+dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
+
+# create some data: elevation, landcover, and temp/ET dependent on elevation and landcover
+dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
+dat$landcover <- ifelse(dat$elevation < median(dat$elevation), 1, 2)
+dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
+dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 
 # run the gls model
-gls_results <- gls_spatial(data = dat, landcover_varname = 'lc', landcover_vec = c('a', 'b'), reg_formula = var3 ~ var1 + var2, error_formula = ~x+y)
+regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2),
+                                  reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
 
-# add predicted values of var3 to the data.frame
-dat$var3_predict <- gls_spatial_predict(data = dat, reg_results = gls_results, landcover = unique(dat$lc))
+# add vector of predicted values of var3 to the data.frame
+dat$ET_predicted <- foreach(i = 1:nrow(dat), .combine = 'c') \%dopar\% {
+                             gls_spatial_predict(data = dat[i,], reg_results = regression_results, landcover = dat[i,'landcover'])
+                            }
+
+# create raster of predicted values using one landcover type
+ET_predict_raster <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 1, return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
 
 }
