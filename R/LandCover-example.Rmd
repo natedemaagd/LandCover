@@ -97,7 +97,7 @@ rm(merge_func, dat_terrain, dat_landcover, dat_temp, dat_ET)
 
 
 
-# Using `gls_spatial()`
+# Using `gls_spatial`
 
 Setting up the data for the example was more complicated than actually running the function once you have a data.frame. To run the function, you'll need to specify, at a minimum, the data, the name of the landcover variable in the data, a vector of specific landcover values for which you want regression results, a regression formula, and the error formula (the coordinates from the data). For our example, let's say we want to test both landcover types, 1 and 2. For each type of landcover, we might be interested in analyzing the relationship between ET, elevation, and temperature. We would set up the function like this:
 
@@ -128,7 +128,7 @@ rm(list=setdiff(ls(), c('dat', 'regression_results')))
 
 
 
-# Using `gls_spatial_predict()`
+# Using `gls_spatial_predict`
 
 Before you get into changing the landcovers and predicting new values, you'll most likely want to get predicted values for your present-day dependent variable. This is because you'll want to compare the *expected* values of today to the *expected* values of the future. If you compare the *true* values of today with the *expected* values of the future, you may get some weird predicted changes that don't make ecological, biological, etc. sense. This could be because of measurement error in the given raster pixel, mis-classification, omitted variables, or any number of reasons.
 
@@ -173,10 +173,38 @@ ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regres
 ET_predicted_ALL_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL',
                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
 
+# create raster with difference between the two rasters above
+ET_predicted_diff <- ET_predicted_lc1_raster - ET_predicted_ALL_raster
+
 
 # plot the rasters, and the difference
-plot(ET_predicted_lc1_raster)
-plot(ET_predicted_ALL_raster)
-plot(ET_predicted_lc1_raster - ET_predicted_ALL_raster)
+plot(ET_predicted_diff)
+
+```
+
+
+
+
+# Using `LandCoverPlot`
+
+This function serves to provide a `ggplot` of a raster with either continuous or categorical values.
+
+```{r using LandCoverPlot}
+
+
+### plot continuous values
+LandCoverPlot(ET_predicted_diff)
+
+# control color scheme
+LandCoverPlot(ET_predicted_diff, low = 'blue', high = 'red')
+#ggsave()
+
+
+### plot priority categories
+LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2)
+
+# choose custom colors
+LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'))
+
 
 ```
