@@ -145,15 +145,11 @@ The second half of this example shows how you can return a raster of predicted v
 ### get expected values of current ET for both landcover types
 
 # get the expected values of present-day ET, using both types of landcover
-dat$ET_predicted <- foreach(i = 1:nrow(dat), .combine = 'c') %dopar% {
-  
-  gls_spatial_predict(data = dat[i,], reg_results = regression_results, landcover = dat[i,'landcover'])
-  
-}
+dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
 
 # plot difference between actual and predicted values for each landcover type
 plot_PredictedVsActual <- ggplot(data = dat) +
-  geom_histogram(aes(x = ET - ET_predicted, fill = as.character(landcover), color = as.character(landcover)), alpha = 0.5, bins = 40) +
+  geom_histogram(aes(x = ET - ET_predicted_ALL, fill = as.character(landcover), color = as.character(landcover)), alpha = 0.5, bins = 40) +
   geom_vline(xintercept = 0, linetype = 'longdash') +
   labs(x = latex2exp::TeX('$ET - \\widehat{ET}$'), y = 'Number of pixels', fill = 'Landcover', color = 'Landcover')
 
@@ -162,8 +158,7 @@ plot_PredictedVsActual
 #ggsave(plot = plot_PredictedVsActual, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/plot_PredictedVsActual.png", dpi = 300, width = 6, height = 6)
 
 # get predicted values for a given landcover
-# typically, we'll just use the `gls_spatial_predict` function to predict ET values for a single landcover. That's easy. Predict values of ET assuming landcover `1` invades everything:
-dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 1)
+dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1)
 
 
 
@@ -171,6 +166,17 @@ dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression
 ##### use function to return raster of predicted values #####
 
 # predict ET assuming all pixels are landcover type 1, return raster
-ET_predicted_LC1_raster_LC1  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 1, return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1,
+                                                return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+
+# do the same thing, but get predicted values assuming no change in landcover (i.e. specify landcover value as 'ALL')
+ET_predicted_ALL_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL',
+                                                return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+
+
+# plot the rasters, and the difference
+plot(ET_predicted_lc1_raster)
+plot(ET_predicted_ALL_raster)
+plot(ET_predicted_lc1_raster - ET_predicted_ALL_raster)
 
 ```
