@@ -35,12 +35,11 @@
 #'                                   reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
 #'
 #' # add vector of predicted values of var3 to the data.frame
-#' dat$ET_predicted <- foreach(i = 1:nrow(dat), .combine = 'c') %dopar% {
-#'                              gls_spatial_predict(data = dat[i,], reg_results = regression_results, landcover = dat[i,'landcover'])
-#'                             }
+#' dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
 #'
 #' # create raster of predicted values using one landcover type
-#' ET_predict_raster <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover = 1, return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+#' ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1,
+#'                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
 #'
 #' @export
 
