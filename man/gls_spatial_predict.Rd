@@ -11,7 +11,7 @@ gls_spatial_predict(data, reg_results, landcover)
 
 \item{reg_results}{object of class \code{gls} from the \code{gls_spatial} function}
 
-\item{lc}{vector of landcovers for which the new dependent variable values are to be predicted}
+\item{lc}{value of landcover for which the new dependent variable values are to be predicted}
 }
 \value{
 A vector with predicted values of the dependent variable from gls_spatial()
