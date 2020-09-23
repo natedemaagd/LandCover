@@ -44,7 +44,7 @@ dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
 
 # create some data: elevation, landcover, and temp/ET dependent on elevation and landcover
 dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
-dat$landcover <- rep(c(1, 2), each = nrow(dat)/2)
+dat$landcover <- ifelse(dat$elevation < median(dat$elevation), 1, 2)
 dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
 dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 
@@ -53,13 +53,14 @@ dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(land
 plot_elevation <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = elevation)) + scale_fill_gradientn(colors = terrain.colors(5))             + coord_equal() + labs(title = 'Elevation data')
 plot_temp      <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = temp))      + scale_fill_gradient(low = "green", high = "darkorange")      + coord_equal() + labs(title = 'Temperature data')
 plot_ET        <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = ET))        + scale_fill_gradient(low = "tan", high = "red")               + coord_equal() + labs(title = 'ET data')
-plot_landcover <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = as.character(landcover))) + coord_equal() + labs(title = 'Landcover data') + scale_fill_discrete(name = 'landcover')
+plot_landcover <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = as.character(landcover))) + coord_equal() + labs(title = 'Landcover data') + scale_fill_manual(values = c('chartreuse3', 'chartreuse4'),
+                                                                                                                                                                         name = 'landcover')
 
 plot_grid <- grid.arrange(plot_elevation, plot_temp, plot_ET, plot_landcover, ncol=2)
 
 plot_grid
 
-#ggsave(plot = plot_grid, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/raster_plots.png", dpi = 300, width = 6, height = 6)
+ggsave(plot = plot_grid, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/raster_plots.png", dpi = 300, width = 6, height = 6)
 
 
 
