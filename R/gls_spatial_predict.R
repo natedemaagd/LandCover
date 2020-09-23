@@ -18,6 +18,7 @@
 #' @details This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the `reg_results` parameter.
 #'
 #' @examples
+#' set.seed(1)
 #' # load packages
 #' library(LandCover); library(foreach); library(raster)
 #'
