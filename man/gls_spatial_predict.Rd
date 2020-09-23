@@ -7,7 +7,8 @@
 gls_spatial_predict(
   data,
   reg_results,
-  landcover,
+  landcover_varname,
+  landcover_val,
   return_raster = FALSE,
   x_coords = NULL,
   y_coords = NULL
@@ -17,6 +18,12 @@ gls_spatial_predict(
 \item{data}{\code{data.frame} with spatial data}
 
 \item{reg_results}{object of class \code{gls} from the \code{gls_spatial} function}
+
+\item{return_raster}{logial. Do you want the result returned as a raster? Default is \code{FALSE}, and a vector is returned. If \code{TRUE}, you must specify the \code{x_coords} and \code{y_coords} from the data.}
+
+\item{x_coords}{vector. A vector of length \code{nrow(data)} specifying the x-coordinates of the raster. Required if \code{return_raster = TRUE}.}
+
+\item{y_coords}{vector. A vector of length \code{nrow(data)} specifying the y-coordinates of the raster. Required if \code{return_raster = TRUE}.}
 
 \item{lc}{value of landcover for which the new dependent variable values are to be predicted}
 }

@@ -8,6 +8,9 @@
 #' @param data `data.frame` with spatial data
 #' @param reg_results object of class `gls` from the `gls_spatial` function
 #' @param lc value of landcover for which the new dependent variable values are to be predicted
+#' @param return_raster logial. Do you want the result returned as a raster? Default is `FALSE`, and a vector is returned. If `TRUE`, you must specify the `x_coords` and `y_coords` from the data.
+#' @param x_coords vector. A vector of length `nrow(data)` specifying the x-coordinates of the raster. Required if `return_raster = TRUE`.
+#' @param y_coords vector. A vector of length `nrow(data)` specifying the y-coordinates of the raster. Required if `return_raster = TRUE`.
 #'
 #' @return A vector with predicted values of the dependent variable from gls_spatial()
 #'
@@ -42,10 +45,42 @@
 
 
 ### FUNCTION:
-gls_spatial_predict <- function(data, reg_results, landcover, return_raster = FALSE, x_coords = NULL, y_coords = NULL){
+gls_spatial_predict <- function(data, reg_results, landcover_varname, landcover_val, return_raster = FALSE, x_coords = NULL, y_coords = NULL){
 
-  # get predicted values
-  pred_values <- predict(object = reg_results[names(reg_results) %in% as.character(landcover)][[1]], newdata = data)
+  # if `landcover == 'ALL'`, return vector of predicted values for current landcover
+  if(landcover_val == 'ALL'){
+
+    # get all unique landcover values
+    landcover_vals <- unique(data[,landcover_varname])
+
+    # create data.frame to hold all predicted values: one column per landcover type
+    pred_values <- foreach(i = 1:length(landcover_vals)) %dopar% {
+
+      predict(object = reg_results[names(reg_results) == as.character(landcover_vals[[i]])][[1]], newdata = data[data[,landcover_varname] == landcover_vals[[i]],])
+
+    }
+    pred_values <- lapply(pred_values, as.vector)  # remove attributes
+
+    # order `pred_values` into one vector
+       # get landcover type for each row in the data.frame
+       landcover_indices <- list()
+       for(j in 1:length(landcover_vals)){ landcover_indices[[j]] <- which(data[,landcover_varname] == landcover_vals[[j]])}
+
+       # unlist the lists
+       landcover_indices <- unlist(landcover_indices)
+       pred_values       <- unlist(pred_values)
+
+    # add ordered pred_values to the data using the landcover_indices
+    pred_values <- pred_values[order(landcover_indices)]
+
+  # otherwise, if `landcover` is a specific value, just use regression results for that one
+  } else {
+
+    # get predicted values
+    pred_values <- predict(object = reg_results[names(reg_results) == as.character(landcover_val)][[1]], newdata = data)
+    pred_values <- as.vector(pred_values)
+
+  }
 
   # if raster = TRUE, return a raster instead of a vector, using the coordinates from `dat`
   if(return_raster == FALSE){return(pred_values)} else {return(raster::rasterFromXYZ(xyz = data.frame(x = x_coords, y = y_coords, z = pred_values)))}
