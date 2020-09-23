@@ -7,7 +7,8 @@
 #'
 #' @param data `data.frame` with spatial data
 #' @param reg_results object of class `gls` from the `gls_spatial` function
-#' @param lc value of landcover for which the new dependent variable values are to be predicted
+#' @param landcover_varname character string. The name of the landcover variable in `data`
+#' @param landcover_val numerical or character. Value of landcover for which the new dependent variable values are to be predicted. Either a specific landcover from your data, or `'ALL'`.
 #' @param return_raster logial. Do you want the result returned as a raster? Default is `FALSE`, and a vector is returned. If `TRUE`, you must specify the `x_coords` and `y_coords` from the data.
 #' @param x_coords vector. A vector of length `nrow(data)` specifying the x-coordinates of the raster. Required if `return_raster = TRUE`.
 #' @param y_coords vector. A vector of length `nrow(data)` specifying the y-coordinates of the raster. Required if `return_raster = TRUE`.

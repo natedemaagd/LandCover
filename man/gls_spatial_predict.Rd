@@ -19,13 +19,15 @@ gls_spatial_predict(
 
 \item{reg_results}{object of class \code{gls} from the \code{gls_spatial} function}
 
+\item{landcover_varname}{character string. The name of the landcover variable in \code{data}}
+
+\item{landcover_val}{numerical or character. Value of landcover for which the new dependent variable values are to be predicted. Either a specific landcover from your data, or \code{'ALL'}.}
+
 \item{return_raster}{logial. Do you want the result returned as a raster? Default is \code{FALSE}, and a vector is returned. If \code{TRUE}, you must specify the \code{x_coords} and \code{y_coords} from the data.}
 
 \item{x_coords}{vector. A vector of length \code{nrow(data)} specifying the x-coordinates of the raster. Required if \code{return_raster = TRUE}.}
 
 \item{y_coords}{vector. A vector of length \code{nrow(data)} specifying the y-coordinates of the raster. Required if \code{return_raster = TRUE}.}
-
-\item{lc}{value of landcover for which the new dependent variable values are to be predicted}
 }
 \value{
 A vector with predicted values of the dependent variable from gls_spatial()
