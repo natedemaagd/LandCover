@@ -8,9 +8,10 @@
 #' @param value_type character string. Specifies whether the values you are plotting are `'continuous'`, `'categorical'`, or `'priority'`. Default is `'continuous'`. See details.
 #' @param blank_background logical. Do you want to remove the plot background (i.e. grid lines, tick marks, legend titles, etc.)? Default is `TRUE`
 #' @param legend_title character string. The legend title. Default is blank.
-#' @param priority_categories numerical. If `value_type = priority`, specifies the number of non-zero priority categories to plot. Default is 5.
+#' @param priority_categories numerical. If `value_type = priority`, specifies the number of non-zero priority categories to plot. Default is 5. If `priority_colors` are not specified, max value is 9.
+#' @param priority_outlier_value numerical. A value specifying an additional priority category for outliers. Can be either positive or negative.
 #' @param decimal_points numerical. Specifies the number of decimal points to report in the legend. Default is 0.
-#' @param priority_colors vector. If `value_type = priority`, a vector of colors with `length(priority_categories)` to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out.
+#' @param priority_colors vector. If `value_type = priority`, a vector of colors of `length(priority_categories)+1` to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out. If `priority_outlier_value` is provided, an additional color must be specified for the outlier category. That is, you must provide a vector of `length(priority_categories)+2` colors.
 #' @param ... Pass additional arguments to adjust the legend and coloring (breaks, labels, limits, color/fill, etc.)
 #' @param RColorBrewer_type character string. For `value_type = categorical`, specify the `RColorBrewer` `type`. See `?RColorBrewer`. Default is `'qual'`
 #' @param RColorBrewer_palette character strong. For `value_type = categorical`, specify the `RColorBrewer` `palette`. See `?RColorBrewer`. Default is `'Dark2'`
@@ -47,8 +48,9 @@
 
 
 ### FUNCTION:
-LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), priority_categories = 5,
-                          decimal_points = 0, priority_colors = c('lightgray', rev(rainbow(priority_categories))), RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2', ...){
+LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), priority_categories = 5, priority_outlier_value = NA, decimal_points = 0,
+                          priority_colors = if(!is.na(priority_outlier_value)){c('lightgray', rev(rainbow(priority_categories+1)))} else {c('lightgray', rev(rainbow(priority_categories)))},
+                          RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2', ...){
 
 
   # initial plot
@@ -81,8 +83,8 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
   }
 
 
-  # plot priority categories
-  if(value_type == 'priority'){
+  # plot priority categories - no outlier cutoff provided
+  if(value_type == 'priority' & is.na(priority_outlier_value)){
 
 
     # get all values of the raster
@@ -96,6 +98,60 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
     # create new raster with the priority values rather than continuous values
     raster2 <- raster
     values(raster2)[values(raster2) > 0] <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
+
+
+    # create labels based on priority category cutoffs
+    legend_labels <- list()
+    for(i in 1:( length(raster_val_breaks)-1 )){
+
+      if(i ==1){
+        legend_labels[[i]] <- paste0(format(round(raster_val_breaks[[i]], digits = decimal_points), nsmall = decimal_points), ' to ',
+                                     format(round(raster_val_breaks[[i+1]], digits = decimal_points), nsmall = decimal_points))
+      }
+
+      else{
+        legend_labels[[i]] <- paste0(format(round(raster_val_breaks[[i]]+ 1*10^(-1*decimal_points), digits = decimal_points), nsmall = decimal_points), ' to ',
+                                     format(round(raster_val_breaks[[i+1]], digits = decimal_points), nsmall = decimal_points))
+      }
+
+
+    }
+
+
+    # add 0 category to legend_labels
+    legend_labels <- c('No change', legend_labels)
+
+
+    # plot priority raster
+    main_plot <- rasterVis::gplot(raster2) +
+      geom_raster(aes(fill = as.character(value))) +
+      coord_equal() +
+      labs(fill = legend_title) +
+      scale_fill_manual(labels = legend_labels, values = priority_colors)
+
+  }
+
+
+  # plot priority categories - outlier cutoff provided
+  if(value_type == 'priority' & !is.na(priority_outlier_value)){
+
+
+    # get all values of the raster
+    raster_val = values(raster)[values(raster) != 0]
+
+
+    # get breaks based on specified number of priority categories
+    raster_val_breaks = quantile(raster_val, probs = seq(0, 1, length.out = priority_categories + 1), na.rm = TRUE)
+
+
+    # add outlier value to the breaks
+    raster_val_breaks <- c(raster_val_breaks, priority_outlier_value)
+    raster_val_breaks <- raster_val_breaks[order(raster_val_breaks)]
+
+
+    # create new raster with the priority values rather than continuous values
+    raster2 <- raster
+    values(raster2)[values(raster2) != 0] <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
 
 
     # create labels based on priority category cutoffs
