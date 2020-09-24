@@ -214,7 +214,7 @@ LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover t
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical.png", dpi = 300)
 
 # change color palette
-LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type', RColorBrewer_palette = 'set3')
+LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type', RColorBrewer_palette = 'Set3')
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical_changeColor.png", dpi = 300)
 
 
