@@ -8,7 +8,7 @@
 #' @param value_type character string. Specifies whether the values you are plotting are `'continuous'`, `'categorical'`, or `'priority'`. Default is `'continuous'`. See details.
 #' @param blank_background logical. Do you want to remove the plot background (i.e. grid lines, tick marks, legend titles, etc.)? Default is `TRUE`
 #' @param legend_title character string. The legend title. Default is blank.
-#' @param break_at_zero logical. Should categories be split at 0? Works for continuous and priority plots. Default is TRUE
+#' @param break_at_zero logical. Should categories be split at 0? Works for continuous and priority plots. Default is `FALSE`.
 #' @param priority_categories numerical. If `value_type = priority`, specifies the number of non-zero priority categories to plot. Default is 5. If `priority_colors` are not specified, max value is 9.
 #' @param priority_outlier_value numerical. A value specifying an additional priority category for outliers. Can be either positive or negative.
 #' @param decimal_points numerical. Specifies the number of decimal points to report in the legend. Default is 0.
@@ -49,7 +49,7 @@
 
 
 ### FUNCTION:
-LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), break_at_zero = TRUE, priority_categories = 5, priority_outlier_value = NA, decimal_points = 0,
+LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA, decimal_points = 0,
                           priority_colors = if(!is.na(priority_outlier_value)){c('lightgray', rev(rainbow(priority_categories+1)))} else {c('lightgray', rev(rainbow(priority_categories)))},
                           RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2', ...){
 
