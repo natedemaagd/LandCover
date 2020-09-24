@@ -9,6 +9,7 @@ LandCoverPlot(
   value_type = "continuous",
   blank_background = TRUE,
   legend_title = element_blank(),
+  break_at_zero = TRUE,
   priority_categories = 5,
   priority_outlier_value = NA,
   decimal_points = 0,
@@ -28,6 +29,8 @@ LandCoverPlot(
 \item{blank_background}{logical. Do you want to remove the plot background (i.e. grid lines, tick marks, legend titles, etc.)? Default is \code{TRUE}}
 
 \item{legend_title}{character string. The legend title. Default is blank.}
+
+\item{break_at_zero}{logical. Should categories be split at 0? Works for continuous and priority plots. Default is TRUE}
 
 \item{priority_categories}{numerical. If \code{value_type = priority}, specifies the number of non-zero priority categories to plot. Default is 5. If \code{priority_colors} are not specified, max value is 9.}
 
