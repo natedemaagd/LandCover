@@ -193,12 +193,12 @@ This function serves to provide a `ggplot` of a raster with either continuous or
 
 
 ### plot continuous values
-LandCoverPlot(ET_predicted_diff)
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot.png", dpi = 300)
+LandCoverPlot(ET_predicted_diff, legend_title = 'ET difference')
+ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot.png", dpi = 300)
 
 # control color scheme
-LandCoverPlot(ET_predicted_diff, low = 'blue', high = 'red')
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_changeColor.png", dpi = 300)
+LandCoverPlot(ET_predicted_diff, legend_title = 'ET difference', low = 'blue', high = 'red')
+ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_changeColor.png", dpi = 300)
 
 
 ### plot categorical values
