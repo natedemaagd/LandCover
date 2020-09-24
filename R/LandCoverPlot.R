@@ -104,12 +104,12 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
       if(i ==1){
         legend_labels[[i]] <- paste0(format(round(raster_val_breaks[[i]], digits = decimal_points), nsmall = decimal_points), ' to ',
-                                     format(round(raster_val_breaks[[i+1]], digits = decimal_points), digits = decimal_points))
+                                     format(round(raster_val_breaks[[i+1]], digits = decimal_points), nsmall = decimal_points))
       }
 
       else{
         legend_labels[[i]] <- paste0(format(round(raster_val_breaks[[i]]+ 1*10^(-1*decimal_points), digits = decimal_points), nsmall = decimal_points), ' to ',
-                                     format(round(raster_val_breaks[[i+1]], digits = decimal_points), digits = decimal_points), nsmall = decimal_points)
+                                     format(round(raster_val_breaks[[i+1]], digits = decimal_points), nsmall = decimal_points))
       }
 
 
