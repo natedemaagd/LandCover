@@ -3,6 +3,7 @@
 export(LandCoverPlot)
 export(gls_spatial)
 export(gls_spatial_predict)
+import(RColorBrewer)
 import(doParallel)
 import(foreach)
 import(ggplot2)

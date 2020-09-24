@@ -2,7 +2,7 @@
 #'
 #' After creating `gls` object(s) with the `gls_spatial()` function, this will create predicted values of the dependent variable from your regression, for the specified landcovers. Particularly useful once your landcover files have changed and you want to predict what effect this may have on the dependent variable.
 #'
-#' @import ggplot2 rasterVis
+#' @import ggplot2 rasterVis RColorBrewer
 #'
 #' @param raster a `raster` object. The raster you wish to plot
 #' @param value_type character string. Specifies whether the values you are plotting are `'continuous'`, `'categorical'`, or `'priority'`. Default is `'continuous'`. See details.
@@ -12,6 +12,8 @@
 #' @param decimal_points numerical. Specifies the number of decimal points to report in the legend. Default is 0.
 #' @param priority_colors vector. If `value_type = priority`, a vector of colors with `length(priority_categories)` to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out.
 #' @param ... Pass additional arguments to adjust the legend and coloring (breaks, labels, limits, color/fill, etc.)
+#' @param RColorBrewer_type character string. For `value_type = categorical`, specify the `RColorBrewer` `type`. See `?RColorBrewer`. Default is `'qual'`
+#' @param RColorBrewer_palette character strong. For `value_type = categorical`, specify the `RColorBrewer` `palette`. See `?RColorBrewer`. Default is `'Dark2'`
 #'
 #' @return A a `ggplot` object
 #'
@@ -46,7 +48,7 @@
 
 ### FUNCTION:
 LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), priority_categories = 5,
-                          decimal_points = 0, priority_colors = c('lightgray', rev(rainbow(priority_categories))), ...){
+                          decimal_points = 0, priority_colors = c('lightgray', rev(rainbow(priority_categories))), RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2', ...){
 
 
   # initial plot
@@ -69,9 +71,12 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
 
   # plot categorical values
+
+  n_vals <- length(unique(values(raster)))
+
   if(value_type == 'categorical'){
 
-    main_plot <- main_plot + geom_raster(aes(fill = as.character(round(value)))) + scale_fill_discrete(...)
+    main_plot <- main_plot + geom_raster(aes(fill = as.character(round(value)))) + scale_fill_brewer(type = RColorBrewer_type, palette = RColorBrewer_palette)
 
   }
 

@@ -194,17 +194,34 @@ This function serves to provide a `ggplot` of a raster with either continuous or
 
 ### plot continuous values
 LandCoverPlot(ET_predicted_diff)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot.png", dpi = 300)
 
 # control color scheme
 LandCoverPlot(ET_predicted_diff, low = 'blue', high = 'red')
-#ggsave()
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_changeColor.png", dpi = 300)
+
+
+### plot categorical values
+
+# create landcover raster
+lc_raster <- rasterFromXYZ(data.frame(x = dat$x, y = dat$y, z = dat$landcover))
+
+# plot
+LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type')
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical.png", dpi = 300)
+
+# change color palette
+LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type', RColorBrewer_palette = 'set3')
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical_changeColor.png", dpi = 300)
 
 
 ### plot priority categories
 LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority.png", dpi = 300)
 
 # choose custom colors
 LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'))
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_changeColor.png", dpi = 300)
 
 
 ```

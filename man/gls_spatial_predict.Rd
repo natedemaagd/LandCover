@@ -39,6 +39,7 @@ After creating \code{gls} object(s) with the \code{gls_spatial()} function, this
 This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the \code{reg_results} parameter.
 }
 \examples{
+set.seed(1)
 # load packages
 library(LandCover); library(foreach); library(raster)
 
@@ -55,7 +56,7 @@ dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(land
 regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2),
                                   reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
 
-# add vector of predicted values of var3 to the data.frame
+# get the expected values of present-day ET, using both types of landcover
 dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
 
 # create raster of predicted values using one landcover type

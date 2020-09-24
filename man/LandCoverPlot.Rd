@@ -12,6 +12,8 @@ LandCoverPlot(
   priority_categories = 5,
   decimal_points = 0,
   priority_colors = c("lightgray", rev(rainbow(priority_categories))),
+  RColorBrewer_type = "qual",
+  RColorBrewer_palette = "Dark2",
   ...
 )
 }
@@ -29,6 +31,10 @@ LandCoverPlot(
 \item{decimal_points}{numerical. Specifies the number of decimal points to report in the legend. Default is 0.}
 
 \item{priority_colors}{vector. If \code{value_type = priority}, a vector of colors with \code{length(priority_categories)} to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out.}
+
+\item{RColorBrewer_type}{character string. For \code{value_type = categorical}, specify the \code{RColorBrewer} \code{type}. See \code{?RColorBrewer}. Default is \code{'qual'}}
+
+\item{RColorBrewer_palette}{character strong. For \code{value_type = categorical}, specify the \code{RColorBrewer} \code{palette}. See \code{?RColorBrewer}. Default is \code{'Dark2'}}
 
 \item{...}{Pass additional arguments to adjust the legend and coloring (breaks, labels, limits, color/fill, etc.)}
 }
