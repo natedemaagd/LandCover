@@ -223,7 +223,7 @@ LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover t
 
 # plot
 LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET')
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority.png", dpi = 300)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority.png", dpi = 300, height = 7, width = 7)
 
 # choose custom colors
 LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'), legend_title = 'Change in ET')
