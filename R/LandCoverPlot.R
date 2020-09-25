@@ -186,7 +186,7 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
     }
 
 
-    # add 0 category to legend_labels, and add 'Outlier' in place of the outlier values, according to whether it's a positve or negative value
+    # add 0 category to legend_labels and add 'Outlier' in place of the outlier values, according to whether it's a positve or negative value
     if(priority_outlier_value < 0){
 
       legend_labels <- c('No change', 'Low-value outlier', legend_labels[-1])
