@@ -8,6 +8,7 @@
 #' @param value_type character string. Specifies whether the values you are plotting are `'continuous'`, `'categorical'`, or `'priority'`. Default is `'continuous'`. See details.
 #' @param blank_background logical. Do you want to remove the plot background (i.e. grid lines, tick marks, legend titles, etc.)? Default is `TRUE`
 #' @param legend_title character string. The legend title. Default is blank.
+#' @param font_size numerical. Font size of text in the plot. Default is 11.
 #' @param break_at_zero logical. Should categories be split at 0? Works for continuous and priority plots. Default is `FALSE`.
 #' @param priority_categories numerical. If `value_type = priority`, specifies the number of non-zero priority categories to plot. Default is 5. If `priority_colors` are not specified, max value is 9.
 #' @param priority_outlier_value numerical. A value specifying an additional priority category for outliers. Can be either positive or negative.
@@ -49,7 +50,7 @@
 
 
 ### FUNCTION:
-LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA, decimal_points = 0,
+LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), font_size = 11, break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA, decimal_points = 0,
                           priority_colors = if(!is.na(priority_outlier_value)){c('lightgray', rev(rainbow(priority_categories+1)))} else {c('lightgray', rev(rainbow(priority_categories)))},
                           RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2', ...){
 
@@ -213,7 +214,12 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
     main_plot <- main_plot + theme(panel.background = element_blank(),
                                    axis.text = element_blank(),
                                    axis.ticks = element_blank(),
-                                   axis.title = element_blank())
+                                   axis.title = element_blank(),
+                                   text = element_text(size = font_size))
+
+  } else {
+
+    main_plot <- main_plot + theme(text = element_text(size = font_size))
 
   }
 

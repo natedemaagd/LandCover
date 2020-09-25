@@ -9,6 +9,7 @@ LandCoverPlot(
   value_type = "continuous",
   blank_background = TRUE,
   legend_title = element_blank(),
+  font_size = 11,
   break_at_zero = FALSE,
   priority_categories = 5,
   priority_outlier_value = NA,
@@ -29,6 +30,8 @@ LandCoverPlot(
 \item{blank_background}{logical. Do you want to remove the plot background (i.e. grid lines, tick marks, legend titles, etc.)? Default is \code{TRUE}}
 
 \item{legend_title}{character string. The legend title. Default is blank.}
+
+\item{font_size}{numerical. Font size of text in the plot. Default is 11.}
 
 \item{break_at_zero}{logical. Should categories be split at 0? Works for continuous and priority plots. Default is \code{FALSE}.}
 
