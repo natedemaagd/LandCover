@@ -72,6 +72,7 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
   }
 
+  # plot continuous values - no break at zero
   if(value_type == 'continuous' & isFALSE(break_at_zero)){
 
     main_plot <- main_plot + geom_raster(aes(fill = value)) + scale_fill_continuous(...)
