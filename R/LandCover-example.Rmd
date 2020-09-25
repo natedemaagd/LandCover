@@ -177,7 +177,7 @@ ET_predicted_ALL_raster  <- gls_spatial_predict(data = dat, reg_results = regres
 ET_predicted_diff <- ET_predicted_lc1_raster - ET_predicted_ALL_raster
 
 
-# plot the rasters, and the difference
+# plot the difference raster
 plot(ET_predicted_diff)
 
 ```
