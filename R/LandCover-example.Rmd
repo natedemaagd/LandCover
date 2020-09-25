@@ -195,12 +195,12 @@ This function serves to provide a `ggplot` of a raster with either continuous or
 ### plot continuous values
 
 #plot
-LandCoverPlot(ET_predicted_diff, legend_title = 'ET difference', font_size = 15)
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot.png", dpi = 300, height = 7, width = 7)
+LandCoverPlot(ET_predicted_diff, legend_title = 'ET difference', font_size = 20)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot.png", dpi = 300, height = 5, width = 5)
 
 # control color scheme
-LandCoverPlot(ET_predicted_diff, legend_title = 'ET difference', font_size = 15, low = 'blue', high = 'red')
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_changeColor.png", dpi = 300, height = 7, width = 7)
+LandCoverPlot(ET_predicted_diff, legend_title = 'ET difference', font_size = 20, low = 'blue', high = 'red')
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_changeColor.png", dpi = 300, height = 5, width = 5)
 
 
 
@@ -210,28 +210,28 @@ LandCoverPlot(ET_predicted_diff, legend_title = 'ET difference', font_size = 15,
 lc_raster <- rasterFromXYZ(data.frame(x = dat$x, y = dat$y, z = dat$landcover))
 
 # plot
-LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type', font_size = 15)
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical.png", dpi = 300, height = 7, width = 7)
+LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type', font_size = 20)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical.png", dpi = 300, height = 5, width = 5)
 
 # change color palette
-LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type', RColorBrewer_palette = 'Set3', font_size = 15)
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical_changeColor.png", dpi = 300, height = 7, width = 7)
+LandCoverPlot(lc_raster, value_type = 'categorical', legend_title = 'Landcover type', RColorBrewer_palette = 'Set3', font_size = 20)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_categorical_changeColor.png", dpi = 300, height = 5, width = 5)
 
 
 
 ### plot priority categories
 
 # plot
-LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 15)
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority.png", dpi = 300, height = 7, width = 7)
+LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 20)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority.png", dpi = 300, height = 5, width = 5)
 
 # choose custom colors
-LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'), legend_title = 'Change in ET', font_size = 15)
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_changeColor.png", dpi = 300, height = 7, width = 7)
+LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'), legend_title = 'Change in ET', font_size = 20)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_changeColor.png", dpi = 300, height = 5, width = 5)
 
 # specify an outlier cutoff value
-LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 15, priority_outlier_value = 1)
-#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_outlier.png", dpi = 300, height = 7, width = 7)
+LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 20, priority_outlier_value = 1)
+#ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_outlier.png", dpi = 300, height = 5, width = 5)
 
 
 ```
