@@ -229,7 +229,7 @@ LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, le
 LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'), legend_title = 'Change in ET', font_size = 15)
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_changeColor.png", dpi = 300, height = 7, width = 7)
 
-# specify an outlier
+# specify an outlier cutoff value
 LandCoverPlot(ET_predicted_diff, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 15, priority_outlier_value = 1)
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_outlier.png", dpi = 300, height = 7, width = 7)
 
