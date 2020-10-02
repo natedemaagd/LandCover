@@ -134,129 +134,28 @@ rm(list=setdiff(ls(), c('dat', 'regression_results')))
 
 Before you get into changing the landcovers and predicting new values, you'll most likely want to get predicted values for your present-day dependent variable. This is because you'll want to compare the *expected* values of today to the *expected* values of the future. If you compare the *true* values of today with the *expected* values of the future, you may get some weird predicted changes that don't make ecological, biological, etc. sense. This could be because of measurement error in the given raster pixel, mis-classification, omitted variables, or any number of reasons.
 
-The second half of this example shows how you can return a raster of predicted values, rather than a vector. This will be useful for the landcover spread portion of your project, because you'll want to know the expected values of the dependent variable for the new landcover type.
+The function returns two vectors: the first vector gives the predicted values of the dependent variable for the invasive and susceptible landcovers before invasion. The second vector gives the predicted values of the dependent variable, assuming the invasive landcover as replaced all susceptible landcovers.
+
+The function also returns two rasters: the first is the raster of predicted values before invasion, and the second is a raster of predicted values post-invasion.
+
+NOTE: all landcovers that are not invasive or susceptible are given the original values of their dependent variable. This prevents issues when plotting the data, since we do not want to see a change in values for landcovers not being considered in the analysis. Doing this instead of giving them a value of `NA` helps to plot the rasters, where we usually want to color missing values differently than values of 0.
 
 ```{r using gls_spatial_predict}
 
 
 
-
-# ##### use function to return vector of values #####
-# 
-# 
-# ### get expected values of current ET for both landcover types
-# 
-# # get the expected values of present-day ET, using both types of landcover
-# dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
-# 
-# # plot difference between actual and predicted values for each landcover type
-# plot_PredictedVsActual <- ggplot(data = dat) +
-#   geom_histogram(aes(x = ET - ET_predicted_ALL, fill = as.character(landcover), color = as.character(landcover)), alpha = 0.5, bins = 40) +
-#   geom_vline(xintercept = 0, linetype = 'longdash') +
-#   labs(x = latex2exp::TeX('$ET - \\widehat{ET}$'), y = 'Number of pixels', fill = 'Landcover', color = 'Landcover')
-# 
-# plot_PredictedVsActual
-# 
-# #ggsave(plot = plot_PredictedVsActual, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/plot_PredictedVsActual.png", dpi = 300, width = 6, height = 6)
-# 
-# # get predicted values for a given landcover
-# dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1)
-# 
-# 
-# 
-# 
-# ##### use function to return raster of predicted values #####
-# 
-# # predict ET assuming all pixels are landcover type 1, return raster
-# ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1,
-#                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
-# 
-# # do the same thing, but get predicted values assuming no change in landcover (i.e. specify landcover value as 'ALL')
-# ET_predicted_ALL_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL',
-#                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
-# 
-# # create raster with difference between the two rasters above
-# ET_predicted_diff <- ET_predicted_lc1_raster - ET_predicted_ALL_raster
-# 
-# 
-# # plot the difference raster
-# plot(ET_predicted_diff)
+# predict values of ET before and after invasion
+pred_values <- gls_spatial_predict(data = dat, regression_results = regression_results, landcover_varname = 'landcover', landcover_invasive = 1, landcover_susceptible = 2,
+                                   dep_varname = 'ET', x_coords_varname = 'x', y_coords_varname = 'y')
 
 
+# add predicted values to `dat`
+dat$ET_predicted_current <- pred_values$`Predicted values, current landcover`
+dat$ET_predicted_invaded <- pred_values$`Predicted values, post-invasion`
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-gls_spatial_predict <- function(data, regression_results, landcover_varname, landcover_invasive, landcover_susceptible, dep_varname, x_coords_varname, y_coords_varname){
-  
-  
-  # get predicted values with current landcover for invasive and susceptible landcovers
-  pred_val_current <- NA
-  for(i in 1:nrow(dat)){
-  
-    # if you didn't run a regression for that landcover, return NA
-    if(!(as.character(data[, landcover_varname][[i]]) %in% names(regression_results))){ pred_val_current[[i]] <- data[i, dep_varname]}
-  
-    else{ pred_val_current[[i]] <- predict(regression_results[names(regression_results) == as.character(dat[,'landcover'][[i]])][[1]], newdata = data[i,])}
-  
-  }
-  
-  
-  # get predicted when landcover invades
-  pred_val_invaded <- NA
-  for(i in 1:nrow(dat)){
-  
-    # if you didn't run a regression for that landcover, return NA
-    if(!(as.character(dat[,'landcover'][[i]]) %in% names(regression_results))){ pred_val_invaded[[i]] <- dat[i, dep_varname]}
-  
-    else{ pred_val_invaded[[i]] <- predict(regression_results[names(regression_results) == as.character(landcover_invasive)][[1]], newdata = dat[i,])}
-    
-  }
-  
-  
-  # convert to rasters
-  pred_val_current_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_current))
-  pred_val_invaded_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_invaded))
-  
-  
-  # return results
-  results <- list(pred_val_current, pred_val_invaded, pred_val_current_raster, pred_val_invaded_raster)
-  
-  names(results) <- c('Predicted values, current landcover', 'Predicted values, post-invasion', 'Predicted values raster, current landcover', 'Predicted values raster, post-invasion')
-  
-  return(results)
-  
-}
+# add change in ET based on predicted values
+dat$ET_change <- dat$ET_predicted_invaded - dat$ET_predicted_current
 
 ```
 

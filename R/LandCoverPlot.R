@@ -34,6 +34,7 @@
 #' # create some data: elevation, landcover, and temp/ET dependent on elevation and landcover
 #' dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
 #' dat$landcover <- ifelse(dat$elevation < median(dat$elevation), 1, 2)
+#' dat[dat$x < median(dat$x) & dat$landcover == 2, 'landcover'] <- 3
 #' dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
 #' dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 #'
@@ -41,9 +42,9 @@
 #' # run regression
 #' regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2), reg_formula = ET ~ elevation + temp, error_formula = ~x+y)
 #'
-#' # predict ET assuming all pixels are landcover type 1, return raster
-#' ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1,
-#'                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+#' # get predicted values data
+#' predicted_values <- gls_spatial_predict(data = dat, regression_results = regression_results, landcover_varname = 'landcover', landcover_invasive = 1, landcover_susceptible = 2, dep_varname = 'ET',
+#'                                         x_coords_varname = 'x', y_coords_varname = 'y')
 #'
 #' LandCoverPlot(ET_predicted_lc1_raster)
 #' @export

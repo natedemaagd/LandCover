@@ -27,9 +27,11 @@
 #' # initialize data.frame with coordinates
 #' dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
 #'
+#'
 #' # create some data: elevation, landcover, and temp/ET dependent on elevation and landcover
 #' dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
 #' dat$landcover <- ifelse(dat$elevation < median(dat$elevation), 1, 2)
+#' dat[dat$x < median(dat$x) & dat$landcover == 2, 'landcover'] <- 3
 #' dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
 #' dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 #'
