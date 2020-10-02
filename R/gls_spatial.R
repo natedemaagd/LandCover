@@ -7,7 +7,7 @@
 #'
 #' @param data `data.frame` with spatial data
 #' @param landcover_varname character string specifying the landcover variable from `data`
-#' @param landcover_vec vector of all landcover types in `data$landcover_varname` to be analyzed
+#' @param landcover_vec vector of all landcover types in `data$landcover_varname` to be analyzed. This should include the landcover that is spreading along with all landcovers that are susceptible to the spread.
 #' @param reg_formula regression formula to be used, as in `lm()`, with columns from `data` (e.g. `c ~ a + b`)
 #' @param error_formula one-sided formula specifying coordinate columns from `data` (e.g. `~ x + y`)
 #' @param num_cores numerical. Number of cores for parallel processing, max 5

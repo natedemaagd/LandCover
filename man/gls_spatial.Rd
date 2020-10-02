@@ -22,7 +22,7 @@ gls_spatial(
 
 \item{landcover_varname}{character string specifying the landcover variable from \code{data}}
 
-\item{landcover_vec}{vector of all landcover types in \code{data$landcover_varname} to be analyzed}
+\item{landcover_vec}{vector of all landcover types in \code{data$landcover_varname} to be analyzed. This should include the landcover that is spreading along with all landcovers that are susceptible to the spread.}
 
 \item{reg_formula}{regression formula to be used, as in \code{lm()}, with columns from \code{data} (e.g. \code{c ~ a + b})}
 

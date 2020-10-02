@@ -27,7 +27,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(1)
 library(LandCover); library(gridExtra); library(ggplot2); library(raster); library(foreach)
-library(sp); library(tidyr); library(rgdal)
+library(sp); library(tidyr); library(rgdal); library(tidyverse)
 
 ```
 
@@ -46,6 +46,7 @@ dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
 # create some data: elevation, landcover, and temp/ET dependent on elevation and landcover
 dat$elevation <- with(dat, 50 + 2*x + 5*y + rnorm(nrow(dat), sd = 7))
 dat$landcover <- ifelse(dat$elevation < median(dat$elevation), 1, 2)
+dat[dat$x < median(dat$x) & dat$landcover == 2, 'landcover'] <- 3
 dat$temp      <- with(dat, (120-0.7*(0.5*elevation + 0.3*y - 0.5*x + ifelse(landcover == 'lc1', -30, 0) + rnorm(nrow(dat)))))
 dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(landcover == 'lc1', +20, 0) + rnorm(nrow(dat)))))
 
@@ -54,14 +55,14 @@ dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(land
 plot_elevation <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = elevation)) + scale_fill_gradientn(colors = terrain.colors(5))             + coord_equal() + labs(title = 'Elevation data')
 plot_temp      <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = temp))      + scale_fill_gradient(low = "green", high = "darkorange")      + coord_equal() + labs(title = 'Temperature data')
 plot_ET        <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = ET))        + scale_fill_gradient(low = "tan", high = "red")               + coord_equal() + labs(title = 'ET data')
-plot_landcover <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = as.character(landcover))) + coord_equal() + labs(title = 'Landcover data') + scale_fill_manual(values = c('chartreuse3', 'chartreuse4'),
-                                                                                                                                                                         name = 'landcover')
+plot_landcover <- ggplot(data = dat) + geom_raster(aes(x = x, y=y, fill = as.character(landcover))) + coord_equal() + labs(title = 'Landcover data') +
+  scale_fill_manual(values = c('chartreuse2', 'chartreuse3', 'chartreuse4'), name = 'landcover')
 
 plot_grid <- grid.arrange(plot_elevation, plot_temp, plot_ET, plot_landcover, ncol=2)
 
 plot_grid
 
-#ggsave(plot = plot_grid, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/raster_plots.png", dpi = 300, width = 6, height = 6)
+ggsave(plot = plot_grid, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/raster_plots.png", dpi = 300, width = 6, height = 6)
 
 
 
@@ -140,46 +141,122 @@ The second half of this example shows how you can return a raster of predicted v
 
 
 
-##### use function to return vector of values #####
+# ##### use function to return vector of values #####
+# 
+# 
+# ### get expected values of current ET for both landcover types
+# 
+# # get the expected values of present-day ET, using both types of landcover
+# dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
+# 
+# # plot difference between actual and predicted values for each landcover type
+# plot_PredictedVsActual <- ggplot(data = dat) +
+#   geom_histogram(aes(x = ET - ET_predicted_ALL, fill = as.character(landcover), color = as.character(landcover)), alpha = 0.5, bins = 40) +
+#   geom_vline(xintercept = 0, linetype = 'longdash') +
+#   labs(x = latex2exp::TeX('$ET - \\widehat{ET}$'), y = 'Number of pixels', fill = 'Landcover', color = 'Landcover')
+# 
+# plot_PredictedVsActual
+# 
+# #ggsave(plot = plot_PredictedVsActual, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/plot_PredictedVsActual.png", dpi = 300, width = 6, height = 6)
+# 
+# # get predicted values for a given landcover
+# dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1)
+# 
+# 
+# 
+# 
+# ##### use function to return raster of predicted values #####
+# 
+# # predict ET assuming all pixels are landcover type 1, return raster
+# ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1,
+#                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+# 
+# # do the same thing, but get predicted values assuming no change in landcover (i.e. specify landcover value as 'ALL')
+# ET_predicted_ALL_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL',
+#                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+# 
+# # create raster with difference between the two rasters above
+# ET_predicted_diff <- ET_predicted_lc1_raster - ET_predicted_ALL_raster
+# 
+# 
+# # plot the difference raster
+# plot(ET_predicted_diff)
 
 
-### get expected values of current ET for both landcover types
-
-# get the expected values of present-day ET, using both types of landcover
-dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
-
-# plot difference between actual and predicted values for each landcover type
-plot_PredictedVsActual <- ggplot(data = dat) +
-  geom_histogram(aes(x = ET - ET_predicted_ALL, fill = as.character(landcover), color = as.character(landcover)), alpha = 0.5, bins = 40) +
-  geom_vline(xintercept = 0, linetype = 'longdash') +
-  labs(x = latex2exp::TeX('$ET - \\widehat{ET}$'), y = 'Number of pixels', fill = 'Landcover', color = 'Landcover')
-
-plot_PredictedVsActual
-
-#ggsave(plot = plot_PredictedVsActual, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/plot_PredictedVsActual.png", dpi = 300, width = 6, height = 6)
-
-# get predicted values for a given landcover
-dat$ET_predicted_lc1 <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1)
 
 
 
 
-##### use function to return raster of predicted values #####
-
-# predict ET assuming all pixels are landcover type 1, return raster
-ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1,
-                                                return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
-
-# do the same thing, but get predicted values assuming no change in landcover (i.e. specify landcover value as 'ALL')
-ET_predicted_ALL_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL',
-                                                return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
-
-# create raster with difference between the two rasters above
-ET_predicted_diff <- ET_predicted_lc1_raster - ET_predicted_ALL_raster
 
 
-# plot the difference raster
-plot(ET_predicted_diff)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+gls_spatial_predict <- function(data, regression_results, landcover_varname, landcover_invasive, landcover_susceptible, dep_varname, x_coords_varname, y_coords_varname){
+  
+  
+  # get predicted values with current landcover for invasive and susceptible landcovers
+  pred_val_current <- NA
+  for(i in 1:nrow(dat)){
+  
+    # if you didn't run a regression for that landcover, return NA
+    if(!(as.character(data[, landcover_varname][[i]]) %in% names(regression_results))){ pred_val_current[[i]] <- data[i, dep_varname]}
+  
+    else{ pred_val_current[[i]] <- predict(regression_results[names(regression_results) == as.character(dat[,'landcover'][[i]])][[1]], newdata = data[i,])}
+  
+  }
+  
+  
+  # get predicted when landcover invades
+  pred_val_invaded <- NA
+  for(i in 1:nrow(dat)){
+  
+    # if you didn't run a regression for that landcover, return NA
+    if(!(as.character(dat[,'landcover'][[i]]) %in% names(regression_results))){ pred_val_invaded[[i]] <- dat[i, dep_varname]}
+  
+    else{ pred_val_invaded[[i]] <- predict(regression_results[names(regression_results) == as.character(landcover_invasive)][[1]], newdata = dat[i,])}
+    
+  }
+  
+  
+  # convert to rasters
+  pred_val_current_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_current))
+  pred_val_invaded_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_invaded))
+  
+  
+  # return results
+  results <- list(pred_val_current, pred_val_invaded, pred_val_current_raster, pred_val_invaded_raster)
+  
+  names(results) <- c('Predicted values, current landcover', 'Predicted values, post-invasion', 'Predicted values raster, current landcover', 'Predicted values raster, post-invasion')
+  
+  return(results)
+  
+}
 
 ```
 

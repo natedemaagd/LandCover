@@ -6,16 +6,17 @@
 #' @importFrom foreach %dopar%
 #'
 #' @param data `data.frame` with spatial data
-#' @param reg_results object of class `gls` from the `gls_spatial` function
+#' @param regression_results object of class `gls` from the `gls_spatial` function
 #' @param landcover_varname character string. The name of the landcover variable in `data`
-#' @param landcover_val numerical or character. Value of landcover for which the new dependent variable values are to be predicted. Either a specific landcover from your data, or `'ALL'`.
-#' @param return_raster logial. Do you want the result returned as a raster? Default is `FALSE`, and a vector is returned. If `TRUE`, you must specify the `x_coords` and `y_coords` from the data.
-#' @param x_coords vector. A vector of length `nrow(data)` specifying the x-coordinates of the raster. Required if `return_raster = TRUE`.
-#' @param y_coords vector. A vector of length `nrow(data)` specifying the y-coordinates of the raster. Required if `return_raster = TRUE`.
+#' @param landcover_invasive value. Numerical or character value of the invasive landcover.
+#' @param landcover_susceptible value. Numerical or character value(s) of the susceptible landcover(s). If more than one susceptible landcover, provide a vector `c()`.
+#' @param dep_varname character string. Name of the dependent variable in `data`.
+#' @param x_coords_varname character string. Name of the x-coordinate variable in `data`.
+#' @param y_coords_varname character string. Name of the y-coordinate variable in `data`.
 #'
-#' @return A vector with predicted values of the dependent variable from gls_spatial()
+#' @return A list of predicted values for current landcover, invaded landcover, and the associated rasters.
 #'
-#' @details This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the `reg_results` parameter.
+#' @details This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the `regression_results` parameter. It returns a list of four objects: (1)a vector of predicted values under the current landcover; (2) a vector of predicted values assuming the invasive landcover takes the place of all susceptible landcovers; (3) a raster of predicted values under the current landcover; and (4) a raster of predicted values assuming the invasive landcover takes the place of all susceptible landcovers.
 #'
 #' @examples
 #' set.seed(1)
@@ -35,56 +36,51 @@
 #' regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2),
 #'                                   reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
 #'
-#' # get the expected values of present-day ET, using both types of landcover
-#' dat$ET_predicted_ALL <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 'ALL')
-#'
-#' # create raster of predicted values using one landcover type
-#' ET_predicted_lc1_raster  <- gls_spatial_predict(data = dat, reg_results = regression_results, landcover_varname = 'landcover', landcover_val = 1,
-#'                                                 return_raster = TRUE, x_coords = dat$x, y_coords = dat$y)
+#' predicted_values <- gls_spatial_predict(data = dat, regression_results = regression_results, landcover_varname = 'landcover', landcover_invasive = 1, landcover_susceptible = 2, dep_varname = 'ET',
+#'                                         x_coords_varname = 'x', y_coords_varname = 'y')
 #'
 #' @export
 
 
 ### FUNCTION:
-gls_spatial_predict <- function(data, reg_results, landcover_varname, landcover_val, return_raster = FALSE, x_coords = NULL, y_coords = NULL){
+gls_spatial_predict <- function(data, regression_results, landcover_varname, landcover_invasive, landcover_susceptible, dep_varname, x_coords_varname, y_coords_varname){
 
-  # if `landcover == 'ALL'`, return vector of predicted values for current landcover
-  if(landcover_val == 'ALL'){
 
-    # get all unique landcover values
-    landcover_vals <- unique(data[,landcover_varname])
+  # get predicted values with current landcover for invasive and susceptible landcovers
+  pred_val_current <- NA
+  for(i in 1:nrow(dat)){
 
-    # create data.frame to hold all predicted values: one column per landcover type
-    pred_values <- foreach(i = 1:length(landcover_vals)) %dopar% {
+    # if you didn't run a regression for that landcover, return NA
+    if(!(as.character(data[, landcover_varname][[i]]) %in% names(regression_results))){ pred_val_current[[i]] <- data[i, dep_varname]}
 
-      predict(object = reg_results[names(reg_results) == as.character(landcover_vals[[i]])][[1]], newdata = data[data[,landcover_varname] == landcover_vals[[i]],])
-
-    }
-    pred_values <- lapply(pred_values, as.vector)  # remove attributes
-
-    # order `pred_values` into one vector
-       # get landcover type for each row in the data.frame
-       landcover_indices <- list()
-       for(j in 1:length(landcover_vals)){ landcover_indices[[j]] <- which(data[,landcover_varname] == landcover_vals[[j]])}
-
-       # unlist the lists
-       landcover_indices <- unlist(landcover_indices)
-       pred_values       <- unlist(pred_values)
-
-    # add ordered pred_values to the data using the landcover_indices
-    pred_values <- pred_values[order(landcover_indices)]
-
-  # otherwise, if `landcover` is a specific value, just use regression results for that one
-  } else {
-
-    # get predicted values
-    pred_values <- predict(object = reg_results[names(reg_results) == as.character(landcover_val)][[1]], newdata = data)
-    pred_values <- as.vector(pred_values)
+    else{ pred_val_current[[i]] <- predict(regression_results[names(regression_results) == as.character(dat[,'landcover'][[i]])][[1]], newdata = data[i,])}
 
   }
 
-  # if raster = TRUE, return a raster instead of a vector, using the coordinates from `dat`
-  if(return_raster == FALSE){return(pred_values)} else {return(raster::rasterFromXYZ(xyz = data.frame(x = x_coords, y = y_coords, z = pred_values)))}
+
+  # get predicted when landcover invades
+  pred_val_invaded <- NA
+  for(i in 1:nrow(dat)){
+
+    # if you didn't run a regression for that landcover, return NA
+    if(!(as.character(dat[,'landcover'][[i]]) %in% names(regression_results))){ pred_val_invaded[[i]] <- dat[i, dep_varname]}
+
+    else{ pred_val_invaded[[i]] <- predict(regression_results[names(regression_results) == as.character(landcover_invasive)][[1]], newdata = dat[i,])}
+
+  }
+
+
+  # convert to rasters
+  pred_val_current_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_current))
+  pred_val_invaded_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_invaded))
+
+
+  # return results
+  results <- list(pred_val_current, pred_val_invaded, pred_val_current_raster, pred_val_invaded_raster)
+
+  names(results) <- c('Predicted values, current landcover', 'Predicted values, post-invasion', 'Predicted values raster, current landcover', 'Predicted values raster, post-invasion')
+
+  return(results)
 
 }
 
