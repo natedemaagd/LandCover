@@ -73,15 +73,21 @@ gls_spatial_predict <- function(data, regression_results, landcover_varname, lan
   }
 
 
+  # get change in dependent variable
+  pred_val_change <- pred_val_invaded - pred_val_current
+
+
   # convert to rasters
   pred_val_current_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_current))
   pred_val_invaded_raster <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_invaded))
+  pred_val_change_raster  <- rasterFromXYZ(cbind(data[c(x_coords_varname, y_coords_varname)], pred_val_change))
 
 
   # return results
-  results <- list(pred_val_current, pred_val_invaded, pred_val_current_raster, pred_val_invaded_raster)
+  results <- list(pred_val_current, pred_val_invaded, pred_val_change, pred_val_current_raster, pred_val_invaded_raster, pred_val_change_raster)
 
-  names(results) <- c('Predicted values, current landcover', 'Predicted values, post-invasion', 'Predicted values raster, current landcover', 'Predicted values raster, post-invasion')
+  names(results) <- c('Predicted values, current landcover',        'Predicted values, post-invasion',        'Predicted values, change',
+                      'Predicted values raster, current landcover', 'Predicted values raster, post-invasion', 'Predicted values raster, change')
 
   return(results)
 
