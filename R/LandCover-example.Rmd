@@ -67,7 +67,7 @@ ggsave(plot = plot_grid, filename = "C:/Users/nated/OneDrive - hawaii.edu/Docume
 
 
 
-### if you have rasters, you'll need to first use the `raster_to_dataframe()` function
+### if you have rasters, you'll need to first use the `rasters_to_dataframe()` function
 
      # create rasters as an example, using the existing data created above (!!!!skip this in your own workflow since you already have rasters!!!!)
      raster_terrain   <- rasterFromXYZ(dat[c('x', 'y', 'elevation')])
@@ -75,19 +75,7 @@ ggsave(plot = plot_grid, filename = "C:/Users/nated/OneDrive - hawaii.edu/Docume
      raster_temp      <- rasterFromXYZ(dat[c('x', 'y', 'temp')])
      raster_ET        <- rasterFromXYZ(dat[c('x', 'y', 'ET')])
 
-# convert rasters to data.frames
-dat_terrain   <- as.data.frame(raster_terrain,   xy = TRUE)
-dat_landcover <- as.data.frame(raster_landcover, xy = TRUE)
-dat_temp      <- as.data.frame(raster_temp,      xy = TRUE)
-dat_ET        <- as.data.frame(raster_ET,        xy = TRUE)
-
-# merge new data.frames by coordinates
-merge_func <- function(x, y)
-  merge(x, y, by=c("x", "y"), all=TRUE)
-
-dat <- Reduce(merge_func, list(dat_terrain, dat_landcover, dat_temp, dat_ET))
-
-rm(merge_func, dat_terrain, dat_landcover, dat_temp, dat_ET)
+dat <- rasters_to_dataframe(raster_terrain, raster_landcover, raster_temp, raster_ET)
 
 ```
 
