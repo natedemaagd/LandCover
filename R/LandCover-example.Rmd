@@ -189,11 +189,11 @@ rm(lc_raster)
 ### plot priority categories
 
 # plot
-LandCoverPlot(pred_values$`Predicted values raster, change`, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 20)
+LandCoverPlot(pred_values[[6]], value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 20)
 ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority.png", dpi = 300, height = 5, width = 5)
 
 # choose custom colors
-LandCoverPlot(pred_values$`Predicted values raster, change`, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'),
+LandCoverPlot(pred_values$`Predicted values raster, post-invasion`, value_type = 'priority', decimal_points = 2, priority_colors = c('black', 'tan', 'orange', 'blue', 'gray', 'limegreen'),
               legend_title = 'Change in ET', font_size = 20)
 ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_changeColor.png", dpi = 300, height = 5, width = 5)
 

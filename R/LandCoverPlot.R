@@ -103,7 +103,7 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
 
     # get all values of the raster
-    raster_val = values(raster)[values(raster) > 0]
+    raster_val = values(raster)[values(raster) != 0]
 
 
     # get breaks based on specified number of priority categories
@@ -112,14 +112,14 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
     # create new raster with the priority values rather than continuous values
     raster2 <- raster
-    values(raster2)[values(raster2) > 0] <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
+    values(raster2)[values(raster2) != 0] <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
 
 
     # create labels based on priority category cutoffs
     legend_labels <- list()
     for(i in 1:( length(raster_val_breaks)-1 )){
 
-      if(i ==1){
+      if(i == 1){
         legend_labels[[i]] <- paste0(format(round(raster_val_breaks[[i]], digits = decimal_points), nsmall = decimal_points), ' to ',
                                      format(round(raster_val_breaks[[i+1]], digits = decimal_points), nsmall = decimal_points))
       }
