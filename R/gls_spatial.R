@@ -56,11 +56,11 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
   reg_formula <- formula(reg_formula)
 
   # define correlation types
-  corr_types <- list(nlme::corLin(  form = formula(error_formula), nugget = TRUE, value = c(200, 0.1)),
-                     nlme::corGaus( form = formula(error_formula), nugget = TRUE, value = c(200, 0.1)),
-                     nlme::corRatio(form = formula(error_formula), nugget = TRUE, value = c(200, 0.1)),
-                     nlme::corSpher(form = formula(error_formula), nugget = TRUE, value = c(200, 0.1)),
-                     nlme::corExp(  form = formula(error_formula), nugget = TRUE, value = c(200, 0.1)))
+  corr_types <- list(nlme::corLin(  form = formula(error_formula)),
+                     nlme::corGaus( form = formula(error_formula)),
+                     nlme::corRatio(form = formula(error_formula)),
+                     nlme::corSpher(form = formula(error_formula)),
+                     nlme::corExp(  form = formula(error_formula)))
 
 
 

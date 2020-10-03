@@ -53,10 +53,11 @@ gls_spatial_predict <- function(data, regression_results, landcover_varname, lan
   pred_val_current <- NA
   for(i in 1:nrow(dat)){
 
-    # if you didn't run a regression for that landcover, return NA
+    # if you didn't run a regression for that landcover, return the actual value
     if(!(as.character(data[, landcover_varname][[i]]) %in% names(regression_results))){ pred_val_current[[i]] <- data[i, dep_varname]}
 
-    else{ pred_val_current[[i]] <- predict(regression_results[names(regression_results) == as.character(dat[,'landcover'][[i]])][[1]], newdata = data[i,])}
+    # otherwise, return the predicted value
+    else{ pred_val_current[[i]] <- predict(regression_results[names(regression_results) == as.character(dat[, landcover_varname][[i]])][[1]], newdata = data[i,])}
 
   }
 
@@ -66,8 +67,9 @@ gls_spatial_predict <- function(data, regression_results, landcover_varname, lan
   for(i in 1:nrow(dat)){
 
     # if you didn't run a regression for that landcover, return NA
-    if(!(as.character(dat[,'landcover'][[i]]) %in% names(regression_results))){ pred_val_invaded[[i]] <- dat[i, dep_varname]}
+    if(!(as.character(dat[, landcover_varname][[i]]) %in% names(regression_results))){ pred_val_invaded[[i]] <- dat[i, dep_varname]}
 
+    # otherwise, return the predicted value
     else{ pred_val_invaded[[i]] <- predict(regression_results[names(regression_results) == as.character(landcover_invasive)][[1]], newdata = dat[i,])}
 
   }

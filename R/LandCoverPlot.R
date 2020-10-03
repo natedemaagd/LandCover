@@ -14,6 +14,7 @@
 #' @param priority_outlier_value numerical. A value specifying an additional priority category for outliers. Can be either positive or negative.
 #' @param decimal_points numerical. Specifies the number of decimal points to report in the legend. Default is 0.
 #' @param priority_colors vector. If `value_type = priority`, a vector of colors of `length(priority_categories)+1` to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out. If `priority_outlier_value` is provided, an additional color must be specified for the outlier category. That is, you must provide a vector of `length(priority_categories)+2` colors.
+#' @param flip_colors logical. Should the priority colors be flipped? Default is `FALSE`. Useful for negative values.
 #' @param ... Pass additional arguments to adjust the legend and coloring (breaks, labels, limits, color/fill, etc.)
 #' @param RColorBrewer_type character string. For `value_type = categorical`, specify the `RColorBrewer` `type`. See `?RColorBrewer`. Default is `'qual'`
 #' @param RColorBrewer_palette character strong. For `value_type = categorical`, specify the `RColorBrewer` `palette`. See `?RColorBrewer`. Default is `'Dark2'`
@@ -51,8 +52,10 @@
 
 
 ### FUNCTION:
-LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), font_size = 11, break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA, decimal_points = 0,
+LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), font_size = 11, break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA,
+                          decimal_points = 0,
                           priority_colors = if(!is.na(priority_outlier_value)){c('lightgray', rev(rainbow(priority_categories+1)))} else {c('lightgray', rev(rainbow(priority_categories)))},
+                          flip_colors = FALSE,
                           RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2', ...){
 
 
@@ -137,12 +140,24 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
     legend_labels <- c('No change', legend_labels)
 
 
-    # plot priority raster
-    main_plot <- rasterVis::gplot(raster2) +
-      geom_raster(aes(fill = as.character(value))) +
-      coord_equal() +
-      labs(fill = legend_title) +
-      scale_fill_manual(labels = legend_labels, values = priority_colors)
+    # plot priority raster according to whether the colors are flipped
+    if(isTRUE(flip_colors)){
+
+      main_plot <- rasterVis::gplot(raster2) +
+        geom_raster(aes(fill = as.character(value))) +
+        coord_equal() +
+        labs(fill = legend_title) +
+        scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])))
+
+    } else {
+
+      main_plot <- rasterVis::gplot(raster2) +
+        geom_raster(aes(fill = as.character(value))) +
+        coord_equal() +
+        labs(fill = legend_title) +
+        scale_fill_manual(labels = legend_labels, values = priority_colors)
+
+    }
 
   }
 
@@ -199,12 +214,24 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
     }
 
 
-    # plot priority raster
-    main_plot <- gplot(raster2) +
-      geom_raster(aes(fill = as.character(value))) +
-      coord_equal() +
-      labs(fill = legend_title) +
-      scale_fill_manual(labels = legend_labels, values = priority_colors)
+    # plot priority raster according to whether the colors are flipped
+    if(isTRUE(flip_colors)){
+
+      main_plot <- rasterVis::gplot(raster2) +
+        geom_raster(aes(fill = as.character(value))) +
+        coord_equal() +
+        labs(fill = legend_title) +
+        scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])))
+
+    } else {
+
+      main_plot <- rasterVis::gplot(raster2) +
+        geom_raster(aes(fill = as.character(value))) +
+        coord_equal() +
+        labs(fill = legend_title) +
+        scale_fill_manual(labels = legend_labels, values = priority_colors)
+
+    }
 
   }
 
