@@ -122,11 +122,9 @@ rm(list=setdiff(ls(), c('dat', 'regression_results')))
 
 Before you get into changing the landcovers and predicting new values, you'll most likely want to get predicted values for your present-day dependent variable. This is because you'll want to compare the *expected* values of today to the *expected* values of the future. If you compare the *true* values of today with the *expected* values of the future, you may get some weird predicted changes that don't make ecological, biological, etc. sense. This could be because of measurement error in the given raster pixel, mis-classification, omitted variables, or any number of reasons.
 
-The function returns two vectors: the first vector gives the predicted values of the dependent variable for the invasive and susceptible landcovers before invasion. The second vector gives the predicted values of the dependent variable, assuming the invasive landcover as replaced all susceptible landcovers.
+The function returns a list of six objects: (1) a vector of the predicted values of the dependent variable given current landcover; (2) a vector of the predicted values of the dependent variable assuming invasion of all susceptible landcovers; (3) a vector of the change in predicted values; (3) - (6) rasters corresponding to the vectors (1) to (3).
 
-The function also returns two rasters: the first is the raster of predicted values before invasion, and the second is a raster of predicted values post-invasion.
-
-NOTE: all landcovers that are not invasive or susceptible are given the original values of their dependent variable. This prevents issues when plotting the data, since we do not want to see a change in values for landcovers not being considered in the analysis. Doing this instead of giving them a value of `NA` helps to plot the rasters, where we usually want to color missing values differently than values of 0.
+NOTE: all landcovers that are not invasive or susceptible are given the original values of their dependent variable as their predicted value. This prevents issues when plotting the data, since we do not want to see a change in values for landcovers not being considered in the analysis. Doing this instead of giving them a value of `NA` helps to plot the rasters, where we usually want to color missing values differently than values of 0.
 
 ```{r using gls_spatial_predict}
 
@@ -157,6 +155,11 @@ plot_PredictedVsActual
 
 #ggsave(plot = plot_PredictedVsActual, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/plot_PredictedVsActual.png", dpi = 300, width = 6, height = 6)
 
+
+# plot predicted change
+ggplot() + geom_raster(aes(x = dat$x, y = dat$y, fill = pred_values$`Predicted values, change`)) + labs(fill = 'Change in ET')
+#ggsave(filename = 'C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/ET_predicted_diff.png', dpi = 300, width = 6, height = 6)
+
 ```
 
 
@@ -171,7 +174,7 @@ This function serves to provide a `ggplot` of a raster with either continuous or
 
 ### plot continuous values
 
-#plot
+#plot predicted change in ET
 LandCoverPlot(pred_values$`Predicted values raster, change`, legend_title = 'ET difference', font_size = 20, decimal_points = 2)
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot.png", dpi = 300, height = 5, width = 5)
 
@@ -200,7 +203,7 @@ rm(lc_raster)
 
 ### plot priority categories
 
-# plot
+# plot change in ET priority categories with flipped colors
 LandCoverPlot(pred_values$`Predicted values raster, change`, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 20, flip_colors = TRUE)
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority.png", dpi = 300, height = 5, width = 5)
 
@@ -209,7 +212,7 @@ LandCoverPlot(pred_values$`Predicted values raster, change`, value_type = 'prior
               legend_title = 'Change in ET', font_size = 20)
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_changeColor.png", dpi = 300, height = 5, width = 5)
 
-# specify an outlier cutoff value
+# specify an outlier cutoff value and flip colors
 LandCoverPlot(pred_values$`Predicted values raster, change`, value_type = 'priority', decimal_points = 2, legend_title = 'Change in ET', font_size = 20, priority_outlier_value = -1.4, flip_colors = TRUE)
 #ggsave("C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/LandCoverPlot_priority_outlier.png", dpi = 300, height = 5, width = 5)
 
