@@ -2,7 +2,7 @@
 #'
 #' After creating `gls` object(s) with the `gls_spatial()` function, this will create predicted values of the dependent variable from your regression, for the specified landcovers. Particularly useful once your landcover files have changed and you want to predict what effect this may have on the dependent variable.
 #'
-#' @import ggplot2 rasterVis RColorBrewer
+#' @import ggplot2 rasterVis RColorBrewer viridis
 #'
 #' @param raster a `raster` object. The raster you wish to plot
 #' @param value_type character string. Specifies whether the values you are plotting are `'continuous'`, `'categorical'`, or `'priority'`. Default is `'continuous'`. See details.
@@ -10,14 +10,19 @@
 #' @param legend_title character string. The legend title. Default is blank.
 #' @param font_size numerical. Font size of text in the plot. Default is 11.
 #' @param break_at_zero logical. Should categories be split at 0? Works for continuous and priority plots. Default is `FALSE`.
-#' @param priority_categories numerical. If `value_type = priority`, specifies the number of non-zero priority categories to plot. Default is 5. If `priority_colors` are not specified, max value is 9.
+#' @param priority_categories numerical. If `value_type = 'priority'`, specifies the number of non-zero priority categories to plot. Default is 5. If `priority_colors` are not specified, max value is 9.
 #' @param priority_outlier_value numerical. A value specifying an additional priority category for outliers. Can be either positive or negative.
 #' @param decimal_points numerical. Specifies the number of decimal points to report in the legend. Default is 0.
-#' @param priority_colors vector. If `value_type = priority`, a vector of colors of `length(priority_categories)+1` to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out. If `priority_outlier_value` is provided, an additional color must be specified for the outlier category. That is, you must provide a vector of `length(priority_categories)+2` colors.
+#' @param priority_colors vector. If `value_type = 'priority'`, a vector of colors of `length(priority_categories)+1` to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out. If `priority_outlier_value` is provided, an additional color must be specified for the outlier category. That is, you must provide a vector of `length(priority_categories)+2` colors.
 #' @param flip_colors logical. Should the priority colors be flipped? Default is `FALSE`. Useful for negative values.
 #' @param ... Pass additional arguments to adjust the legend and coloring (breaks, labels, limits, color/fill, etc.)
-#' @param RColorBrewer_type character string. For `value_type = categorical`, specify the `RColorBrewer` `type`. See `?RColorBrewer`. Default is `'qual'`
-#' @param RColorBrewer_palette character strong. For `value_type = categorical`, specify the `RColorBrewer` `palette`. See `?RColorBrewer`. Default is `'Dark2'`
+#' @param RColorBrewer_type character string. For `value_type = 'categorical'`, specify the `RColorBrewer` `type`. See `?RColorBrewer`. Default is `'qual'`
+#' @param RColorBrewer_palette character string. For `value_type = 'categorical'`, specify the `RColorBrewer` `palette`. See `?RColorBrewer`. Default is `'Dark2'`
+#' @param continuous_type character string. For `value_type = 'continuous'`, specify color scale. See `?scale_fill_continuous`. Default is colorblind-friendly `viridis`.
+#' @param continuous_break0_low character string. For `value_type = 'continuous'` and `break_at_zero = TRUE`, set the low color. See `?scale_color_gradient2`.
+#' @param continuous_break0_high character string. For `value_type = 'continuous'` and `break_at_zero = TRUE`, set the high color. See `?scale_color_gradient2`.
+#' @param continuous_break0_mid character string. For `value_type = 'continuous'` and `break_at_zero = TRUE`, set the color for values of 0. See `?scale_color_gradient2`.
+#' @param categorical_direction numerical. For `value_type = 'categorical'`, flip the direction of the color scale by setting the value to `-1`.
 #'
 #' @return A a `ggplot` object
 #'
@@ -54,9 +59,14 @@
 ### FUNCTION:
 LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), font_size = 11, break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA,
                           decimal_points = 0,
-                          priority_colors = if(!is.na(priority_outlier_value)){c('lightgray', rev(rainbow(priority_categories+1)))} else {c('lightgray', rev(rainbow(priority_categories)))},
+                          priority_colors = if(!is.na(priority_outlier_value)){c('lightgray', viridis::viridis(priority_categories+1))} else {c('lightgray', viridis::viridis(priority_categories))},
                           flip_colors = FALSE,
-                          RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2', ...){
+                          RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2',
+                          continuous_type = 'viridis',
+                          continuous_break0_low = '#440154FF',
+                          continuous_break0_high = '#FDE725FF',
+                          continuous_break0_mid  = 'lightgray',
+                          categorical_direction = 1){
 
 
   # initial plot
@@ -73,14 +83,34 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
   # plot continuous values - break at zero
   if(value_type == 'continuous' & isTRUE(break_at_zero)){
 
-    main_plot <- main_plot + geom_raster(aes(fill = value)) + scale_fill_gradient2(...)
+    main_plot <- main_plot + geom_raster(aes(fill = value)) + scale_fill_gradient2(low = continuous_break0_low, high = continuous_break0_high, mid = continuous_break0_mid,
+                                                                                   limits = c(min(values(raster)),
+                                                                                              max(values(raster))),
+                                                                                   breaks = c(min(values(raster)),
+                                                                                              (min(values(raster)) + max(values(raster)))/2,
+                                                                                              max(values(raster))),
+                                                                                   labels = format(round(c(min(values(raster)),
+                                                                                                           (min(values(raster)) + max(values(raster)))/2,
+                                                                                                           max(values(raster))),
+                                                                                                         digits = decimal_points),
+                                                                                                   nsmall = decimal_points))
 
   }
 
   # plot continuous values - no break at zero
   if(value_type == 'continuous' & isFALSE(break_at_zero)){
 
-    main_plot <- main_plot + geom_raster(aes(fill = value)) + scale_fill_continuous(...)
+    main_plot <- main_plot + geom_raster(aes(fill = value)) + scale_fill_continuous(type = continuous_type,
+                                                                                    limits = c(min(values(raster)),
+                                                                                               max(values(raster))),
+                                                                                    breaks = c(min(values(raster)),
+                                                                                               (min(values(raster)) + max(values(raster)))/2,
+                                                                                               max(values(raster))),
+                                                                                    labels = format(round(c(min(values(raster)),
+                                                                                                            (min(values(raster)) + max(values(raster)))/2,
+                                                                                                            max(values(raster))),
+                                                                                                          digits = decimal_points),
+                                                                                                    nsmall = decimal_points))
 
   }
 
@@ -91,7 +121,7 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
   if(value_type == 'categorical'){
 
-    main_plot <- main_plot + geom_raster(aes(fill = as.character(round(value)))) + scale_fill_brewer(type = RColorBrewer_type, palette = RColorBrewer_palette)
+    main_plot <- main_plot + geom_raster(aes(fill = as.character(round(value)))) + scale_fill_viridis_d(direction = categorical_direction)
 
   }
 

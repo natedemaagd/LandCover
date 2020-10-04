@@ -15,12 +15,16 @@ LandCoverPlot(
   priority_outlier_value = NA,
   decimal_points = 0,
   priority_colors = if (!is.na(priority_outlier_value)) {     c("lightgray",
-    rev(rainbow(priority_categories + 1))) } else {     c("lightgray",
-    rev(rainbow(priority_categories))) },
+    viridis::viridis(priority_categories + 1)) } else {     c("lightgray",
+    viridis::viridis(priority_categories)) },
   flip_colors = FALSE,
   RColorBrewer_type = "qual",
   RColorBrewer_palette = "Dark2",
-  ...
+  continuous_type = "viridis",
+  continuous_break0_low = "#440154FF",
+  continuous_break0_high = "#FDE725FF",
+  continuous_break0_mid = "lightgray",
+  categorical_direction = 1
 )
 }
 \arguments{
@@ -36,19 +40,29 @@ LandCoverPlot(
 
 \item{break_at_zero}{logical. Should categories be split at 0? Works for continuous and priority plots. Default is \code{FALSE}.}
 
-\item{priority_categories}{numerical. If \code{value_type = priority}, specifies the number of non-zero priority categories to plot. Default is 5. If \code{priority_colors} are not specified, max value is 9.}
+\item{priority_categories}{numerical. If \code{value_type = 'priority'}, specifies the number of non-zero priority categories to plot. Default is 5. If \code{priority_colors} are not specified, max value is 9.}
 
 \item{priority_outlier_value}{numerical. A value specifying an additional priority category for outliers. Can be either positive or negative.}
 
 \item{decimal_points}{numerical. Specifies the number of decimal points to report in the legend. Default is 0.}
 
-\item{priority_colors}{vector. If \code{value_type = priority}, a vector of colors of \code{length(priority_categories)+1} to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out. If \code{priority_outlier_value} is provided, an additional color must be specified for the outlier category. That is, you must provide a vector of \code{length(priority_categories)+2} colors.}
+\item{priority_colors}{vector. If \code{value_type = 'priority'}, a vector of colors of \code{length(priority_categories)+1} to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out. If \code{priority_outlier_value} is provided, an additional color must be specified for the outlier category. That is, you must provide a vector of \code{length(priority_categories)+2} colors.}
 
 \item{flip_colors}{logical. Should the priority colors be flipped? Default is \code{FALSE}. Useful for negative values.}
 
-\item{RColorBrewer_type}{character string. For \code{value_type = categorical}, specify the \code{RColorBrewer} \code{type}. See \code{?RColorBrewer}. Default is \code{'qual'}}
+\item{RColorBrewer_type}{character string. For \code{value_type = 'categorical'}, specify the \code{RColorBrewer} \code{type}. See \code{?RColorBrewer}. Default is \code{'qual'}}
 
-\item{RColorBrewer_palette}{character strong. For \code{value_type = categorical}, specify the \code{RColorBrewer} \code{palette}. See \code{?RColorBrewer}. Default is \code{'Dark2'}}
+\item{RColorBrewer_palette}{character string. For \code{value_type = 'categorical'}, specify the \code{RColorBrewer} \code{palette}. See \code{?RColorBrewer}. Default is \code{'Dark2'}}
+
+\item{continuous_type}{character string. For \code{value_type = 'continuous'}, specify color scale. See \code{?scale_fill_continuous}. Default is colorblind-friendly \code{viridis}.}
+
+\item{continuous_break0_low}{character string. For \code{value_type = 'continuous'} and \code{break_at_zero = TRUE}, set the low color. See \code{?scale_color_gradient2}.}
+
+\item{continuous_break0_high}{character string. For \code{value_type = 'continuous'} and \code{break_at_zero = TRUE}, set the high color. See \code{?scale_color_gradient2}.}
+
+\item{continuous_break0_mid}{character string. For \code{value_type = 'continuous'} and \code{break_at_zero = TRUE}, set the color for values of 0. See \code{?scale_color_gradient2}.}
+
+\item{categorical_direction}{numerical. For \code{value_type = 'categorical'}, flip the direction of the color scale by setting the value to \code{-1}.}
 
 \item{...}{Pass additional arguments to adjust the legend and coloring (breaks, labels, limits, color/fill, etc.)}
 }
