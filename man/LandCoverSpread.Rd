@@ -6,20 +6,22 @@
 \usage{
 LandCoverSpread(
   infest_val,
-  suscep,
+  suscep_val,
   spread_rate,
   birdcell,
   simlength,
   simulation_count,
   lc_raster,
   dep_var_raster_initial,
-  dep_var_raster_pred
+  dep_var_raster_pred,
+  dep_var_modifier = NA,
+  silent = FALSE
 )
 }
 \arguments{
 \item{infest_val}{numerical. Value of the landcover that will be spreading.}
 
-\item{suscep}{numerical. Vector of landcover values that are susceptible to the spread.}
+\item{suscep_val}{numerical. Vector of landcover values that are susceptible to the spread.}
 
 \item{spread_rate}{numerical. Value between 0 and 1 indicating the annual spread rate of the invading landcover.}
 
@@ -34,6 +36,10 @@ LandCoverSpread(
 \item{dep_var_raster_initial}{raster. The initial raster for the dependent variable. It is recommended you use a raster of predicted values rather than raw data (i.e. use \code{gls_spatial_predict()} with \code{landcover_val == 'ALL'} specified).}
 
 \item{dep_var_raster_pred}{raster. A raster with predicted values for the dependent variable in all pixels susceptible to invasion. Usually a raster from \code{gls_spatial_predict()}.}
+
+\item{dep_var_modifier}{numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)}
+
+\item{silent}{logical. Suppress printing notification when each simulation is done. Default is \code{FALSE}.}
 }
 \value{
 Lists of rasters (landcover and dependent variable) and, optionally, raster files to a directory of your choosing.

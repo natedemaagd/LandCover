@@ -36,7 +36,7 @@ raster_landcover <- rasterFromXYZ(dat[c('x', 'y', 'landcover')])
 raster_temp      <- rasterFromXYZ(dat[c('x', 'y', 'temp')])
 raster_ET        <- rasterFromXYZ(dat[c('x', 'y', 'ET')])
 
-# convert back to data.frame
+# convert rasters back to data.frame
 rasters_to_dataframe(raster_terrain, raster_landcover, raster_temp, raster_ET)
 
 }

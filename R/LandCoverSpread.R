@@ -6,7 +6,7 @@
 #' @importFrom foreach %dopar%
 #'
 #' @param infest_val numerical. Value of the landcover that will be spreading.
-#' @param suscep numerical. Vector of landcover values that are susceptible to the spread.
+#' @param suscep_val numerical. Vector of landcover values that are susceptible to the spread.
 #' @param spread_rate numerical. Value between 0 and 1 indicating the annual spread rate of the invading landcover.
 #' @param birdcell numerical. Value between 0 and 1 indicating the probability a random cell can be invaded, regardless of adjacency to existing invaded pixels.
 #' @param simlength integer. Number of years the simulation should run.
@@ -14,6 +14,8 @@
 #' @param lc_raster raster. The initial landcover raster.
 #' @param dep_var_raster_initial raster. The initial raster for the dependent variable. It is recommended you use a raster of predicted values rather than raw data (i.e. use `gls_spatial_predict()` with `landcover_val == 'ALL'` specified).
 #' @param dep_var_raster_pred raster. A raster with predicted values for the dependent variable in all pixels susceptible to invasion. Usually a raster from `gls_spatial_predict()`.
+#' @param dep_var_modifier numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)
+#' @param silent logical. Suppress printing notification when each simulation is done. Default is `FALSE`.
 #'
 #' @return Lists of rasters (landcover and dependent variable) and, optionally, raster files to a directory of your choosing.
 #'
@@ -41,11 +43,14 @@
 
 ### FUNCTION:
 
-LandCoverSpread <- function(infest_val, suscep, spread_rate, birdcell, simlength, simulation_count, lc_raster, dep_var_raster_initial, dep_var_raster_pred) {
+LandCoverSpread <- function(infest_val, suscep_val, spread_rate, birdcell, simlength, simulation_count, lc_raster, dep_var_raster_initial, dep_var_raster_pred, dep_var_modifier = NA, silent = FALSE) {
 
 
 
   ##### function for one year #####
+
+  growrate = spread_rate
+  spreadrate = spread_rate
 
   one_year <- function(
     x,
@@ -127,7 +132,7 @@ LandCoverSpread <- function(infest_val, suscep, spread_rate, birdcell, simlength
 
     # run one simulation
     for (i in 1:periods) {
-      one_year_result <- one_year(x, infested_value = infest_val, susceptible_values = suscep,
+      one_year_result <- one_year(x, infested_value = infest_val, susceptible_values = suscep_val,
                                   growth_rate = growrate, bird_rate = birdcell,
                                   counter_layer = list_of_counters[[i]],
                                   old_aet = old_aet, pred_aet = pred_aet)
@@ -207,7 +212,7 @@ LandCoverSpread <- function(infest_val, suscep, spread_rate, birdcell, simlength
     mean_aet_result <- rbind(mean_aet_result, simulation_result$mean_aet)
     median_aet_result <- rbind(median_aet_result, simulation_result$median_aet)
     et_raster[[i]] <- simulation_result$et
-    print(paste0('Simulation ', i, ' of ', simulation_count, ' complete!'))
+    if(isFALSE(silent)){print(paste0('Simulation ', i, ' of ', simulation_count, ' complete!'))}
   }
 
 
@@ -226,7 +231,7 @@ LandCoverSpread <- function(infest_val, suscep, spread_rate, birdcell, simlength
   ##### update results #####
 
   infested_value = infest_val
-  susceptible_values = suscep
+  susceptible_values = suscep_val
   spread_rate = spreadrate
   bird_rate = birdcell
   last_raster <- lc_raster
@@ -257,10 +262,31 @@ LandCoverSpread <- function(infest_val, suscep, spread_rate, birdcell, simlength
   }
 
 
-  final_results <- list(list_of_landcover_rasters = summary_list_of_rasters,
-                        list_of_depvar_rasters    = c(dep_var_raster_initial, list_of_ETrasters))
+  # return final results (with modified dep var if dep_var_modifier == TRUE)
+  if(!is.na(dep_var_modifier)){
+
+    # initiate list of modified depvar rasters (just the original depvar rasters)
+    list_of_modified_depvar_rasters <- c(dep_var_raster_initial, list_of_ETrasters)
+
+    # modify them
+    list_of_modified_depvar_rasters <- lapply(list_of_modified_depvar_rasters, function(r){ r * dep_var_modifier})
+
+    # return results
+    final_results <- list(list_of_landcover_rasters       = summary_list_of_rasters,
+                          list_of_depvar_rasters          = c(dep_var_raster_initial, list_of_ETrasters),
+                          list_of_modified_depvar_rasters = list_of_modified_depvar_rasters)
+
+    return(final_results)
 
 
-  return(final_results)
+  # if depvar modifier is missing, just return the landcover and depvar rasters
+  } else {
+
+    final_results <- list(list_of_landcover_rasters = summary_list_of_rasters,
+                          list_of_depvar_rasters    = c(dep_var_raster_initial, list_of_ETrasters))
+
+    return(final_results)
+
+  }
 
 }
