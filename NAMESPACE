@@ -2,6 +2,7 @@
 
 export(LandCoverPlot)
 export(LandCoverSpread)
+export(SimulationPlots)
 export(gls_spatial)
 export(gls_spatial_predict)
 export(rasters_to_dataframe)

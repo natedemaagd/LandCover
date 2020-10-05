@@ -2,7 +2,7 @@
 #'
 #' This function runs a simulation of landcover spread, using bootstrapped results. It returns a list of landcover rasters and a list of the rasters for your dependent variable; one for each year.
 #'
-#' @import nlme doParallel foreach parallel sp tidyr rgdal raster
+#' @import nlme doParallel foreach parallel sp tidyr rgdal raster viridis
 #' @importFrom foreach %dopar%
 #'
 #' @param infest_val numerical. Value of the landcover that will be spreading.

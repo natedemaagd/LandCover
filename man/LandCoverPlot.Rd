@@ -2,7 +2,7 @@
 % Please edit documentation in R/LandCoverPlot.R
 \name{LandCoverPlot}
 \alias{LandCoverPlot}
-\title{Predict values from \code{gls_spatial()} output}
+\title{Create various plots associated with the landcover data.}
 \usage{
 LandCoverPlot(
   raster,
@@ -70,7 +70,7 @@ LandCoverPlot(
 A a \code{ggplot} object
 }
 \description{
-After creating \code{gls} object(s) with the \code{gls_spatial()} function, this will create predicted values of the dependent variable from your regression, for the specified landcovers. Particularly useful once your landcover files have changed and you want to predict what effect this may have on the dependent variable.
+This function is meant to create various plots associted with the landcover data, both before and after the simulation of the spread. Note that plots related specifically to the timelapse itself (yearly landcover, line graphs) are better plotted with the \code{SimulationPlots} function.
 }
 \details{
 See ?ggplot and ?scale_fill_continuous and ?scale_fill_manual for details about plotting with ggplot and adjusting the legend and colors

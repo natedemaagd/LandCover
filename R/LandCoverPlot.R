@@ -1,6 +1,6 @@
-#' Predict values from `gls_spatial()` output
+#' Create various plots associated with the landcover data.
 #'
-#' After creating `gls` object(s) with the `gls_spatial()` function, this will create predicted values of the dependent variable from your regression, for the specified landcovers. Particularly useful once your landcover files have changed and you want to predict what effect this may have on the dependent variable.
+#' This function is meant to create various plots associted with the landcover data, both before and after the simulation of the spread. Note that plots related specifically to the timelapse itself (yearly landcover, line graphs) are better plotted with the `SimulationPlots` function.
 #'
 #' @import ggplot2 rasterVis RColorBrewer viridis
 #'

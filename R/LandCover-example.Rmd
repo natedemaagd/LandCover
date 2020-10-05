@@ -27,7 +27,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(1)
 library(LandCover); library(gridExtra); library(ggplot2); library(raster); library(foreach)
-library(sp); library(tidyr); library(rgdal); library(tidyverse)
+library(sp); library(tidyr); library(rgdal); library(tidyverse); library(viridis)
 
 ```
 
@@ -233,9 +233,50 @@ This function simulates the spread of a landcover type, given a spread rate and 
 lc_raster <- rasterFromXYZ(dat[c('x', 'y', 'landcover')])
 
 # run landcover simulation
-landcover_sim <- LandCoverSpread(infest_val = 1, suscep_val = 2, spread_rate = 0.05, birdcell = 0, simlength = 10, simulation_count = 100,
+landcover_sim <- LandCoverSpread(infest_val = 1, suscep_val = 2, spread_rate = 0.05, birdcell = 0, simlength = 15, simulation_count = 100,
                                  lc_raster = lc_raster, dep_var_raster_initial = pred_values$`Predicted values raster, current landcover`,
                                  dep_var_raster_pred = pred_values$`Predicted values raster, post-invasion`,
                                  dep_var_modifier = 0.80, silent = TRUE)
+
+```
+
+
+
+
+# Using `LandCoverSpreadPlot`
+
+This function is used to plot results of the simulation
+
+```{r using LandCoverSpreadPlot}
+
+
+# create plots
+simulation_plots <- SimulationPlots(sim_results = landcover_sim, infest_val = 1, dep_var_label = 'Change in ET', dep_var_modified_label = 'Change in\nmodified ET',
+                                    font_size = 15, color_labels = c('ET', 'Modified ET'), flip_colors = TRUE)
+
+
+# plot line graphs
+line_graph <- plot(simulation_plots$line_graph)
+
+
+# plot four landcover plots
+lc_timelapse <- grid.arrange(simulation_plots$lc_plot_timelapse[[1]],
+                             simulation_plots$lc_plot_timelapse[[6]],
+                             simulation_plots$lc_plot_timelapse[[11]],
+                             simulation_plots$lc_plot_timelapse[[16]])
+
+
+# plot four dep_var rasters
+dep_var_timelapse <- grid.arrange(simulation_plots$dep_var_plot_timelapse[[1]],
+                                  simulation_plots$dep_var_plot_timelapse[[6]],
+                                  simulation_plots$dep_var_plot_timelapse[[11]],
+                                  simulation_plots$dep_var_plot_timelapse[[16]])
+
+
+# plot four modified dep_var rasters
+dep_var_modified_timelapse <- grid.arrange(simulation_plots$dep_var_modified_plot_timelapse[[1]],
+                                           simulation_plots$dep_var_modified_plot_timelapse[[6]],
+                                           simulation_plots$dep_var_modified_plot_timelapse[[11]],
+                                           simulation_plots$dep_var_modified_plot_timelapse[[16]])
 
 ```
