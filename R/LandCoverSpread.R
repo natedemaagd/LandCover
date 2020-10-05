@@ -19,7 +19,7 @@
 #'
 #' @return Lists of rasters (landcover and dependent variable) and, optionally, raster files to a directory of your choosing.
 #'
-#' @details The output is a list with two elements: the first element is a list of landcover rasters from year 0 (the initial raster) to year n (the length of the spread period). The second element is a list of rasters for your dependent variable.
+#' @details The output is a list of rasters: landcover over time, dep var over time, modified dep var over time (if specified), change in dep var over time, change in modified dep var over time (if specified), cumulative change in dep var, cumulative change in modified dep var (if specified)
 #'
 #' @examples
 #' # load packages
@@ -37,6 +37,19 @@
 #' # run the gls model
 #' regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2),
 #'                                   reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
+#'
+#' # predict values of ET before and after invasion
+#' pred_values <- gls_spatial_predict(data = dat, regression_results = regression_results, landcover_varname = 'landcover', landcover_invasive = 1, landcover_susceptible = 2,
+#'                                    dep_varname = 'ET', x_coords_varname = 'x', y_coords_varname = 'y')
+#'
+#' # get landcover raster
+#' lc_raster <- rasterFromXYZ(dat[c('x', 'y', 'landcover')])
+#'
+#' # run landcover simulation
+#' landcover_sim <- LandCoverSpread(infest_val = 1, suscep_val = 2, spread_rate = 0.05, birdcell = 0, simlength = 15, simulation_count = 100,
+#'                                  lc_raster = lc_raster, dep_var_raster_initial = pred_values$`Predicted values raster, current landcover`,
+#'                                  dep_var_raster_pred = pred_values$`Predicted values raster, post-invasion`,
+#'                                  dep_var_modifier = 0.80, silent = TRUE)
 #'
 #' @export
 
@@ -262,19 +275,55 @@ LandCoverSpread <- function(infest_val, suscep_val, spread_rate, birdcell, simle
   }
 
 
+
+
+  ##### results #####
+
+
+  # collect results so far
+  list_of_lc_rasters      <- summary_list_of_rasters
+  list_of_dep_var_rasters <- c(dep_var_raster_initial, list_of_ETrasters)
+
+
+  # create list of rasters: change in dep_var relative to year 0
+  list_of_dep_var_rasters_change_from_year_0 <- list()
+
+    # first raster in list (year 0) should be raster of 0s
+    raster_0s <- dep_var_raster_initial
+    values(raster_0s) <- 0
+    list_of_dep_var_rasters_change_from_year_0[[1]] <- raster_0s
+
+  for(i in 2:(simlength+1)){
+
+    list_of_dep_var_rasters_change_from_year_0[[i]] <- list_of_dep_var_rasters[[i]] - dep_var_raster_initial
+
+  }
+
+
+  # raster of cumulative change
+  raster_dep_var_cumulative_change <- Reduce('+', list_of_dep_var_rasters_change_from_year_0)
+
+
   # return final results (with modified dep var if dep_var_modifier == TRUE)
   if(!is.na(dep_var_modifier)){
 
     # initiate list of modified depvar rasters (just the original depvar rasters)
-    list_of_modified_depvar_rasters <- c(dep_var_raster_initial, list_of_ETrasters)
+    list_of_dep_var_rasters_modified                    <- c(dep_var_raster_initial, list_of_ETrasters)  # levels
+    list_of_dep_var_rasters_change_from_year_0_modified <- list_of_dep_var_rasters_change_from_year_0    # changes
 
     # modify them
-    list_of_modified_depvar_rasters <- lapply(list_of_modified_depvar_rasters, function(r){ r * dep_var_modifier})
+    list_of_dep_var_rasters_modified                    <- lapply(list_of_dep_var_rasters_modified,                    function(r){ r * dep_var_modifier })  # levels
+    list_of_dep_var_rasters_change_from_year_0_modified <- lapply(list_of_dep_var_rasters_change_from_year_0_modified, function(r){ r * dep_var_modifier })  # changes
+    raster_dep_var_cumulative_change_modified           <- raster_dep_var_cumulative_change * dep_var_modifier                                               # cumulative change
 
     # return results
-    final_results <- list(list_of_landcover_rasters       = summary_list_of_rasters,
-                          list_of_depvar_rasters          = c(dep_var_raster_initial, list_of_ETrasters),
-                          list_of_modified_depvar_rasters = list_of_modified_depvar_rasters)
+    final_results <- list(list_of_landcover_rasters                           = list_of_lc_rasters,
+                          list_of_dep_var_rasters                             = list_of_dep_var_rasters,
+                          list_of_dep_var_rasters_modified                    = list_of_dep_var_rasters_modified,
+                          list_of_dep_var_rasters_change_from_year_0          = list_of_dep_var_rasters_change_from_year_0,
+                          list_of_dep_var_rasters_change_from_year_0_modified = list_of_dep_var_rasters_change_from_year_0_modified,
+                          raster_dep_var_cumulative_change                    = raster_dep_var_cumulative_change,
+                          raster_dep_var_cumulative_change_modified           = raster_dep_var_cumulative_change_modified)
 
     return(final_results)
 
@@ -282,8 +331,10 @@ LandCoverSpread <- function(infest_val, suscep_val, spread_rate, birdcell, simle
   # if depvar modifier is missing, just return the landcover and depvar rasters
   } else {
 
-    final_results <- list(list_of_landcover_rasters = summary_list_of_rasters,
-                          list_of_depvar_rasters    = c(dep_var_raster_initial, list_of_ETrasters))
+    final_results <- list(list_of_landcover_rasters                           = list_of_lc_rasters,
+                          list_of_dep_var_rasters                             = list_of_dep_var_rasters,
+                          list_of_dep_var_rasters_change_from_year_0          = list_of_dep_var_rasters_change_from_year_0,
+                          raster_dep_var_cumulative_change                    = raster_dep_var_cumulative_change)
 
     return(final_results)
 

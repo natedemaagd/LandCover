@@ -48,7 +48,7 @@ Lists of rasters (landcover and dependent variable) and, optionally, raster file
 This function runs a simulation of landcover spread, using bootstrapped results. It returns a list of landcover rasters and a list of the rasters for your dependent variable; one for each year.
 }
 \details{
-The output is a list with two elements: the first element is a list of landcover rasters from year 0 (the initial raster) to year n (the length of the spread period). The second element is a list of rasters for your dependent variable.
+The output is a list of rasters: landcover over time, dep var over time, modified dep var over time (if specified), change in dep var over time, change in modified dep var over time (if specified), cumulative change in dep var, cumulative change in modified dep var (if specified)
 }
 \examples{
 # load packages
@@ -66,5 +66,18 @@ dat$ET        <- with(dat, (   -0.4*(-2*temp       + 0.5*y - 1.0*x + ifelse(land
 # run the gls model
 regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2),
                                   reg_formula = ET ~ elevation + temp, error_formula = ~ x + y)
+
+# predict values of ET before and after invasion
+pred_values <- gls_spatial_predict(data = dat, regression_results = regression_results, landcover_varname = 'landcover', landcover_invasive = 1, landcover_susceptible = 2,
+                                   dep_varname = 'ET', x_coords_varname = 'x', y_coords_varname = 'y')
+
+# get landcover raster
+lc_raster <- rasterFromXYZ(dat[c('x', 'y', 'landcover')])
+
+# run landcover simulation
+landcover_sim <- LandCoverSpread(infest_val = 1, suscep_val = 2, spread_rate = 0.05, birdcell = 0, simlength = 15, simulation_count = 100,
+                                 lc_raster = lc_raster, dep_var_raster_initial = pred_values$`Predicted values raster, current landcover`,
+                                 dep_var_raster_pred = pred_values$`Predicted values raster, post-invasion`,
+                                 dep_var_modifier = 0.80, silent = TRUE)
 
 }
