@@ -15,3 +15,4 @@ These functions are listed in the suggested order for your workflow. The example
 1. [`gls_spatial_predict`](https://github.com/natedemaagd/LandCover/wiki/gls_spatial_predict) Predict values using results from `gls_spatial` for a specified landcover. Capable of returning either a vecor or raster of predicted values, for either a specified landcover or all current landcovers in a dataset.
 1. [`LandCoverPlot`](https://github.com/natedemaagd/LandCover/wiki/LandCoverPlot) Plot categorical, continuous, and priority plots.
 1. [`LandCoverSpread`](https://github.com/natedemaagd/LandCover/wiki/LandCoverSpread) Run a simulation of landcover spread and associated changes to the dependent variable.
+1. [`SimulationPlot`](https://github.com/natedemaagd/LandCover/wiki/SimulationPlot) Run a simulation of landcover spread and associated changes to the dependent variable.
