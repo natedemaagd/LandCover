@@ -257,7 +257,7 @@ simulation_plots <- SimulationPlots(sim_results = landcover_sim, infest_val = 1,
 
 # plot line graphs
 line_graph <- plot(simulation_plots$line_graph)
-ggsave(plot = line_graph, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_LineGraph.png", dpi = 300, height = 4, width = 7)
+#ggsave(plot = line_graph, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_LineGraph.png", dpi = 300, height = 4, width = 7)
 
 
 # plot four landcover plots
@@ -266,7 +266,7 @@ lc_timelapse <- grid.arrange(simulation_plots$lc_plot_timelapse[[1]],
                              simulation_plots$lc_plot_timelapse[[11]],
                              simulation_plots$lc_plot_timelapse[[16]])
 
-ggsave(plot = lc_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_LandcoverTimelapse.png", dpi = 300, height = 6, width = 6)
+#ggsave(plot = lc_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_LandcoverTimelapse.png", dpi = 300, height = 6, width = 6)
 
 
 # plot four dep_var rasters
@@ -275,7 +275,7 @@ dep_var_timelapse <- grid.arrange(simulation_plots$dep_var_plot_timelapse[[1]],
                                   simulation_plots$dep_var_plot_timelapse[[11]],
                                   simulation_plots$dep_var_plot_timelapse[[16]])
 
-ggsave(plot = dep_var_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_DepVarTimelapse.png", dpi = 300, height = 6, width = 6)
+#ggsave(plot = dep_var_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_DepVarTimelapse.png", dpi = 300, height = 6, width = 6)
 
 
 # plot four modified dep_var rasters
@@ -284,6 +284,6 @@ dep_var_modified_timelapse <- grid.arrange(simulation_plots$dep_var_modified_plo
                                            simulation_plots$dep_var_modified_plot_timelapse[[11]],
                                            simulation_plots$dep_var_modified_plot_timelapse[[16]])
 
-ggsave(plot = dep_var_modified_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_DepVarModifiedTimelapse.png", dpi = 300, height = 6, width = 6)
+#ggsave(plot = dep_var_modified_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_DepVarModifiedTimelapse.png", dpi = 300, height = 6, width = 6)
 
 ```

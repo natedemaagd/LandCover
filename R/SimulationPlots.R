@@ -193,7 +193,7 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
 
         geom_raster(aes(x, y, fill = layer)) +
 
-        scale_fill_gradient2(name = dep_var_label, limits = color_limits, low = fill_low, mid = fill_mid, high = fill_high,
+        scale_fill_gradient2(name = dep_var_modified_label, limits = color_limits, low = fill_low, mid = fill_mid, high = fill_high,
                              breaks = c(min(color_limits), mean(color_limits), max(color_limits)),
                              labels = format(round(c(min(color_limits), mean(color_limits), max(color_limits)), digits = decimal_places), nsmall = decimal_places)) +
 
