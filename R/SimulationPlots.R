@@ -122,17 +122,21 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
 
   # initiate list
   dep_var_plot_timelapse <- list()
+  df_list                <- list()
 
   # fill list
   for(i in 1:length(sim_results$list_of_dep_var_rasters_change_from_year_0)){
 
     # create data.frame from raster
-    df <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0[[i]], xy = TRUE)
+    df_list[[i]] <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0[[i]], xy = TRUE)
 
     # plot
+    df <- df_list[[i]]
+    colnames(df)[[3]] <- 'layer'
+
     dep_var_plot_timelapse[[i]] <- ggplot(data = df) +
 
-      geom_raster(aes(x, y, fill = df[,3])) +
+      geom_raster(aes(x, y, fill = layer)) +
 
       scale_fill_gradient2(name = dep_var_label, limits = color_limits, low = fill_low, mid = fill_mid, high = fill_high,
                            breaks = c(min(color_limits), mean(color_limits), max(color_limits)),
@@ -173,25 +177,29 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
 
     # initiate list
     dep_var_modified_plot_timelapse <- list()
+    df_list                         <- list()
 
     # fill list
     for(i in 1:length(sim_results$list_of_dep_var_rasters_change_from_year_0_modified)){
 
       # create data.frame from raster
-      df <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0_modified[[i]], xy = TRUE)
+      df_list[[i]] <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0_modified[[i]], xy = TRUE)
 
       # plot
+      df <- df_list[[i]]
+      colnames(df)[[3]] <- 'layer'
+
       dep_var_modified_plot_timelapse[[i]] <- ggplot(data = df) +
 
-        geom_raster(aes(x, y, fill = df[,3])) +
+        geom_raster(aes(x, y, fill = layer)) +
 
-        scale_fill_gradient2(name = dep_var_modified_label, limits = color_limits, low = fill_low, mid = fill_mid, high = fill_high,
+        scale_fill_gradient2(name = dep_var_label, limits = color_limits, low = fill_low, mid = fill_mid, high = fill_high,
                              breaks = c(min(color_limits), mean(color_limits), max(color_limits)),
                              labels = format(round(c(min(color_limits), mean(color_limits), max(color_limits)), digits = decimal_places), nsmall = decimal_places)) +
 
         coord_equal() +
 
-        labs(title = paste0('Year ', i-1), fill = paste0('Change in ', dep_var_modified_label, 'from year 0')) +
+        labs(title = paste0('Year ', i-1), fill = paste0('Change in ', dep_var_label, 'from year 0')) +
 
         theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(), text = element_text(size = font_size))
 
