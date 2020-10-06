@@ -272,6 +272,6 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
 
   }
 
-
+  return(sim_plots_results)
 
 }
