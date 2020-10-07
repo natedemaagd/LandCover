@@ -252,7 +252,7 @@ This function is used to plot results of the simulation
 
 # create plots
 simulation_plots <- SimulationPlots(sim_results = landcover_sim, infest_val = 1, dep_var_label = 'Change in ET', dep_var_modified_label = 'Change in\nmodified ET',
-                                    font_size = 15, color_labels = c('ET', 'Modified ET'), flip_colors = TRUE, n_grid = 7)
+                                    font_size = 15, color_labels = c('ET', 'Modified ET'), flip_colors = TRUE, n_grid = 6)
 
 
 # plot line graphs
