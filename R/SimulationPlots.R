@@ -2,7 +2,7 @@
 #'
 #' This plots the results of the landcover simulation data created by `LandCoverSpread`.
 #'
-#' @import sp tidyr rgdal raster ggplot2 viridis
+#' @import sp tidyr rgdal raster ggplot2 viridis ggpubr
 #'
 #' @param sim_results list. The results of the `LandCoverSpread` function.
 #' @param infest_val value. The value of the invasive landcover.
@@ -282,7 +282,7 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
     }
 
     # plot grid
-    lc_timelapse_grid <- do.call(grid.arrange, lc_plot_list)
+    lc_timelapse_grid <- ggpubr::ggarrange(plotlist = lc_plot_list, common.legend = TRUE, legend = 'right')
 
 
   }
@@ -302,7 +302,7 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
     }
 
     # plot grid
-    dep_var_timelapse_grid <- do.call(grid.arrange, dep_var_plot_list)
+    dep_var_timelapse_grid <- ggpubr::ggarrange(plotlist = dep_var_plot_list, common.legend = TRUE, legend = 'right')
 
 
   }
@@ -322,7 +322,7 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
     }
 
     # plot grid
-    dep_var_modified_timelapse_grid <- do.call(grid.arrange, dep_var_modified_plot_list)
+    dep_var_modified_timelapse_grid <- ggpubr::ggarrange(plotlist = dep_var_modified_plot_list, common.legend = TRUE, legend = 'right')
 
 
   }

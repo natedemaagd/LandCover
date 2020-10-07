@@ -27,7 +27,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 set.seed(1)
 library(LandCover); library(gridExtra); library(ggplot2); library(raster); library(foreach)
-library(sp); library(tidyr); library(rgdal); library(tidyverse); library(viridis)
+library(sp); library(tidyr); library(rgdal); library(tidyverse); library(viridis); library(ggpubr)
 
 ```
 
@@ -262,16 +262,19 @@ line_graph <- plot(simulation_plots$line_graph)
 
 # plot grid of landcover plots
 lc_timelapse <- simulation_plots$lc_timelapse_grid
+lc_timelapse
 #ggsave(plot = lc_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_LandcoverTimelapse.png", dpi = 300, height = 6, width = 6)
 
 
 # plot grid of dep_var rasters
 dep_var_timelapse <- simulation_plots$dep_var_timelapse_grid
+dep_var_timelapse
 #ggsave(plot = dep_var_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_DepVarTimelapse.png", dpi = 300, height = 6, width = 6)
 
 
 # plot grid of modified dep_var rasters
 dep_var_modified_timelapse <- simulation_plots$dep_var_modified_timelapse_grid
+dep_var_modified_timelapse
 #ggsave(plot = dep_var_modified_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_DepVarModifiedTimelapse.png", dpi = 300, height = 6, width = 6)
 
 ```
