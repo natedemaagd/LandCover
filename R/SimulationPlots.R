@@ -12,6 +12,7 @@
 #' @param line_thickness value. For the line graph, the thickness of the lines.
 #' @param flip_colors logical. Flips the colors of the raster plots
 #' @param decimal_places numerical. Number of decimal places to report on the legend of continuous plots.
+#' @param n_grid numerical. If you want a grid of timelapse figures, specify the number of plots.
 #'
 #' @return A list of landcover plots and line plots associated with the landcover spread simulation.
 #'
@@ -58,7 +59,8 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
                             font_size = 15, line_thickness = 0.8,
                             line_colors = viridis(2), color_labels = c('Dep. var.', 'Modified dep. var.'),
                             flip_colors = FALSE,
-                            decimal_places = 2){
+                            decimal_places = 2,
+                            n_grid = NA){
 
 
 
@@ -262,24 +264,124 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
 
 
 
-  ### return results
 
-  # return results with modified dep_var
-  if(!is.na(dep_var_modified)){
+  ##### grid plots #####
+
+  # if n_grid is not NA, plot the lc grid
+  if(!is.na(n_grid)){
+
+    # get sequence from 1 to n_grid for plot indicies
+    plot_indices <- round(seq(1, length(lc_plot_timelapse), length.out = n_grid), digits = 0)
+
+    # create list of plots
+    lc_plot_list <- list()
+    for(i in 1:length(plot_indices)){
+
+      lc_plot_list[[i]] <- lc_plot_timelapse[[ plot_indices[[i]] ]]
+
+    }
+
+    # plot grid
+    lc_timelapse_grid <- do.call(grid.arrange, lc_plot_list)
+
+
+  }
+
+  # if n_grid is not NA, plot the dep var grid
+  if(!is.na(n_grid)){
+
+    # get sequence from 1 to n_grid for plot indicies
+    plot_indices <- round(seq(1, length(dep_var_plot_timelapse), length.out = n_grid), digits = 0)
+
+    # create list of plots
+    dep_var_plot_list <- list()
+    for(i in 1:length(plot_indices)){
+
+      dep_var_plot_list[[i]] <- dep_var_plot_timelapse[[ plot_indices[[i]] ]]
+
+    }
+
+    # plot grid
+    dep_var_timelapse_grid <- do.call(grid.arrange, dep_var_plot_list)
+
+
+  }
+
+  # if n_grid is not NA and dep_var_modified is not NA, plot the dep var modified grid
+  if(!is.na(n_grid) & isTRUE(dep_var_modified)){
+
+    # get sequence from 1 to n_grid for plot indicies
+    plot_indices <- round(seq(1, length(dep_var_modified_plot_timelapse), length.out = n_grid), digits = 0)
+
+    # create list of plots
+    dep_var_modified_plot_list <- list()
+    for(i in 1:length(plot_indices)){
+
+      dep_var_modified_plot_list[[i]] <- dep_var_modified_plot_timelapse[[ plot_indices[[i]] ]]
+
+    }
+
+    # plot grid
+    dep_var_modified_timelapse_grid <- do.call(grid.arrange, dep_var_modified_plot_list)
+
+
+  }
+
+
+
+
+
+  ##### return results #####
+
+  # return results no modified dep var and no grid
+  if(isFALSE(dep_var_modified) & is.na(n_grid)){
+
+    sim_plots_results <- list(lc_plot_timelapse               = lc_plot_timelapse,
+                              dep_var_plot_timelapse          = dep_var_plot_timelapse,
+                              line_graph                      = LineGraph)
+
+    return(sim_plots_results)
+
+  }
+
+  # return results no modified dep var but with grid
+  if(isFALSE(dep_var_modified) & !is.na(n_grid)){
+
+    sim_plots_results <- list(lc_plot_timelapse               = lc_plot_timelapse,
+                              lc_timelapse_grid               = lc_timelapse_grid,
+                              dep_var_plot_timelapse          = dep_var_plot_timelapse,
+                              dep_var_timelapse_grid          = dep_var_timelapse_grid,
+                              line_graph                      = LineGraph)
+
+    return(sim_plots_results)
+
+  }
+
+  # return results with modified dep_var but no grid
+  if(isTRUE(dep_var_modified) & is.na(n_grid)){
 
     sim_plots_results <- list(lc_plot_timelapse               = lc_plot_timelapse,
                               dep_var_plot_timelapse          = dep_var_plot_timelapse,
                               dep_var_modified_plot_timelapse = dep_var_modified_plot_timelapse,
                               line_graph                      = LineGraph)
 
-  } else {
-
-    sim_plots_results <- list(lc_plot_timelapse               = lc_plot_timelapse,
-                              dep_var_plot_timelapse          = dep_var_plot_timelapse,
-                              line_graph                      = LineGraph)
+    return(sim_plots_results)
 
   }
 
-  return(sim_plots_results)
+  # return results with modified dep_var and with grid
+  if(isTRUE(dep_var_modified) & !is.na(n_grid)){
+
+    sim_plots_results <- list(lc_plot_timelapse               = lc_plot_timelapse,
+                              lc_timelapse_grid               = lc_timelapse_grid,
+                              dep_var_plot_timelapse          = dep_var_plot_timelapse,
+                              dep_var_timelapse_grid          = dep_var_timelapse_grid,
+                              dep_var_modified_plot_timelapse = dep_var_modified_plot_timelapse,
+                              dep_var_modified_timelapse_grid = dep_var_modified_timelapse_grid,
+                              line_graph                      = LineGraph)
+
+    return(sim_plots_results)
+
+  }
 
 }

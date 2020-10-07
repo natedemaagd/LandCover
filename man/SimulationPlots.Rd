@@ -15,7 +15,8 @@ SimulationPlots(
   line_colors = viridis(2),
   color_labels = c("Dep. var.", "Modified dep. var."),
   flip_colors = FALSE,
-  decimal_places = 2
+  decimal_places = 2,
+  n_grid = NA
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ SimulationPlots(
 \item{flip_colors}{logical. Flips the colors of the raster plots}
 
 \item{decimal_places}{numerical. Number of decimal places to report on the legend of continuous plots.}
+
+\item{n_grid}{numerical. If you want a grid of timelapse figures, specify the number of plots.}
 }
 \value{
 A list of landcover plots and line plots associated with the landcover spread simulation.
