@@ -12,7 +12,7 @@ The package in its current state can be installed with the command `devtools::in
 These functions are listed in the suggested order for your workflow. The examples in the pages mirror those in the [tutorial](R/LandCover-example.Rmd).
 1. [`rasters_to_dataframe`](https://github.com/natedemaagd/LandCover/wiki/rasters_to_dataframe) Convert `raster`s into a single `data.frame`.
 1. [`gls_spatial`](https://github.com/natedemaagd/LandCover/wiki/gls_spatial) Run a spatial GLS model that chooses the best spatial correlation structure based on model AIC.
-1. [`gls_spatial_predict`](https://github.com/natedemaagd/LandCover/wiki/gls_spatial_predict) Predict values using results from `gls_spatial` for a specified landcover. Capable of returning either a vecor or raster of predicted values, for either a specified landcover or all current landcovers in a dataset.
+1. [`gls_spatial_predict`](https://github.com/natedemaagd/LandCover/wiki/gls_spatial_predict) Predict values using results from [`gls_spatial`](https://github.com/natedemaagd/LandCover/wiki/gls_spatial) for a specified landcover. Capable of returning either a vecor or raster of predicted values, for either a specified landcover or all current landcovers in a dataset.
 1. [`LandCoverPlot`](https://github.com/natedemaagd/LandCover/wiki/LandCoverPlot) Plot categorical, continuous, and priority plots.
 1. [`LandCoverSpread`](https://github.com/natedemaagd/LandCover/wiki/LandCoverSpread) Run a simulation of landcover spread and associated changes to the dependent variable.
 1. [`SimulationPlots`](https://github.com/natedemaagd/LandCover/wiki/SimulationPlots) Plot figures associated with the [`LandCoverSpread`](https://github.com/natedemaagd/LandCover/wiki/LandCoverSpread) function.
