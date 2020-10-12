@@ -243,6 +243,20 @@ landcover_sim <- LandCoverSpread(infest_val = 1, suscep_val = 2, spread_rate = 0
 
 
 
+# Using `unit_converter`
+
+This function converts the units of the dependent variables in rasters and `data.frame`s. Requires an object from the `LandCoverSpread` function.
+
+```{r using unit_converter}
+
+
+landcover_sim_units_converted <- unit_converter(LandCoverSpread_results = landcover_sim, unit_conversion_factor = 2)
+
+```
+
+
+
+
 # Using `LandCoverSpreadPlot`
 
 This function is used to plot results of the simulation
