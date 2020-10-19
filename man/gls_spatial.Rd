@@ -39,7 +39,7 @@ gls_spatial(
 \item{silent}{logical. Hides notifications for completion of each landcover type. Default is \code{FALSE}}
 }
 \value{
-A list whose elements are the optimal GLS model. See details.
+A list of two objects. The first list element is a list of regression results for each landcover type. The second list element is a residual density plot, separated by landcover type. See details.
 }
 \description{
 This function runs a GLS model on a spatial dataset. It chooses among five types of correlation structure, and returns the model with the lowest AIC.

@@ -98,12 +98,16 @@ Setting up the data for the example was more complicated than actually running t
 regression_results <- gls_spatial(data = dat, landcover_varname = 'landcover', landcover_vec = c(1,2), reg_formula = ET ~ elevation + temp, error_formula = ~x+y)
 
 # what form of error correlation was chosen for the regressions? Linear for landcover type 1 and Ratio for landcover type 2
-regression_results[[1]]$modelStruct$corStruct
-regression_results[[2]]$modelStruct$corStruct
+regression_results$`Regression results`$`1`$modelStruct$corStruct
+regression_results$`Regression results`$`2`$modelStruct$corStruct
 
 # print a summary of regression from both landcover types
-summary(regression_results[[1]])
-summary(regression_results[[2]])
+summary(regression_results$`Regression results`$`1`)
+summary(regression_results$`Regression results`$`2`)
+
+# plot residuals
+plot(regression_results$`Residuals plot`)
+ggsave('C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/residPlot.png', dpi = 300)
 
 # we don't need anything other than the data and regression results now, so delete everything other than those two things
 rm(list=setdiff(ls(), c('dat', 'regression_results')))
@@ -157,7 +161,7 @@ plot_PredictedVsActual
 
 
 # plot predicted change
-ggplot() + geom_raster(aes(x = dat$x, y = dat$y, fill = pred_values$`Predicted values, change`)) + labs(fill = 'Change in ET')
+ggplot() + geom_raster(aes(x = dat$x, y = dat$y, fill = pred_values$`Predicted values, change`)) + labs(fill = 'Change in ET') + coord_equal()
 #ggsave(filename = 'C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/ET_predicted_diff.png', dpi = 300, width = 6, height = 6)
 
 ```

@@ -2,7 +2,7 @@
 #'
 #' This function runs a GLS model on a spatial dataset. It chooses among five types of correlation structure, and returns the model with the lowest AIC.
 #'
-#' @import nlme doParallel foreach parallel
+#' @import nlme doParallel foreach parallel viridis
 #' @importFrom foreach %dopar%
 #'
 #' @param data `data.frame` with spatial data
@@ -16,7 +16,7 @@
 #' @param tolerance numerical. Tolerance for the convergence criterion, see `?nlme::glsControl()`
 #' @param silent logical. Hides notifications for completion of each landcover type. Default is `FALSE`
 #'
-#' @return A list whose elements are the optimal GLS model. See details.
+#' @return A list of two objects. The first list element is a list of regression results for each landcover type. The second list element is a residual density plot, separated by landcover type. See details.
 #'
 #' @details Landcovers with large numbers of observations will take a long time to run. It is strongly recommended to use 5 cores in parallel. The code runs the landcover types sequentially, and the spatial GLS models for each landcover in parallel. The function will output the landcover and time of completion as it progresses, unless `silent = TRUE`. If there are too many observations for your system, you must take a representative subset. Each list element in the output corresponds to a landcover type. The objects are of class `gls` and will report the correlation structure that resulted in the lowest model AIC. If an element in the output list is `NA`, the log likelihood model failed to converge using all correlation structures. Try increasing the number of iterations or increasing the tolerance.
 #'
@@ -126,7 +126,39 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
     reg_results_final[[i]]$call[[2]] <- formula(reg_formula)
   }
 
-  # return the regression results
+
+
+  ### plot distribution of residuals ###
+
+  # get all residuals
+  resids <- lapply(reg_results_final, function(x){ as.data.frame(x$residuals) })
+
+  # add landcover column
+  for(i in 1:length(resids)){ resids[[i]]$landcover <- names(resids)[[i]] }
+
+  # rbind
+  resids <- do.call('rbind', resids)
+  colnames(resids) <- c('Residuals', 'Landcover')
+
+  # plot
+  resids_plot <- ggplot(data = resids) + geom_density(aes(Residuals, color = Landcover, fill = Landcover), alpha = 0.6, size = 0.8) +
+    theme(text = element_text(size = 15)) +
+    geom_vline(xintercept = 0, linetype = 'longdash') +
+    labs(y = 'Number of points') +
+    scale_fill_viridis_d() +
+    scale_color_viridis_d() +
+    scale_x_continuous(limits = c(min(resids$Residuals, na.rm = TRUE), max(resids$Residuals, na.rm = TRUE)))
+
+
+
+  ### return the regression results and resid plot ###
+
+  # combine results and plot
+  reg_results_final <- list(reg_results_final, resids_plot)
+
+  # name list elements
+  names(reg_results_final) <- c('Regression results', 'Residuals plot')
+
   return(reg_results_final)
 
 }
