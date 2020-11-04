@@ -296,3 +296,33 @@ dep_var_modified_timelapse
 #ggsave(plot = dep_var_modified_timelapse, filename = "C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/SimulationPlot_DepVarModifiedTimelapse.png", dpi = 300, height = 6, width = 6)
 
 ```
+
+
+
+
+
+
+
+
+Using `fullSimulation` function
+
+```{r using fullSimulation}
+
+
+fullSim <- fullSimulation(data                  = dat,
+                          landcover_varname     = 'landcover',
+                          landcover_vec         = c(1,2),
+                          landcover_invasive    = 1,
+                          landcover_susceptible = 2,
+                          reg_formula           = ET ~ elevation + temp,
+                          error_formula         = ~x+y,
+                          dep_varname           = 'ET',
+                          x_coords_varname      = 'x',
+                          y_coords_varname      = 'y',
+                          spread_rate           = 0.05,
+                          birdcell              = 0,
+                          simlength             = 15,
+                          simulation_count      = 100,
+                          dep_var_modifier      = 0.80)
+
+```

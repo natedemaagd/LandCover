@@ -219,9 +219,9 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
   if(isTRUE(dep_var_modified)){
 
     # get data
-    LineGraphData <- data.frame(Year             = 0:(length(landcover_sim$list_of_landcover_rasters)-1                                                   ),
-                                dep_var          = sapply(landcover_sim$list_of_dep_var_rasters_change_from_year_0,          function(r){ sum(values(r)) }),
-                                dep_var_modified = sapply(landcover_sim$list_of_dep_var_rasters_change_from_year_0_modified, function(r){ sum(values(r)) }))
+    LineGraphData <- data.frame(Year             = 0:(length(sim_results$list_of_landcover_rasters)-1                                                   ),
+                                dep_var          = sapply(sim_results$list_of_dep_var_rasters_change_from_year_0,          function(r){ sum(values(r)) }),
+                                dep_var_modified = sapply(sim_results$list_of_dep_var_rasters_change_from_year_0_modified, function(r){ sum(values(r)) }))
 
 
     # melt data
@@ -247,8 +247,8 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
     if(is.na(line_colors)){ line_colors = viridis(2)} else { line_colors = line_colors}
 
     # get data
-    LineGraphData <- data.frame(Year             = 0:(length(landcover_sim$list_of_landcover_rasters)-1                                                   ),
-                                dep_var          = sapply(landcover_sim$list_of_dep_var_rasters_change_from_year_0,          function(r){ sum(values(r)) }))
+    LineGraphData <- data.frame(Year             = 0:(length(sim_results$list_of_landcover_rasters)-1                                                   ),
+                                dep_var          = sapply(sim_results$list_of_dep_var_rasters_change_from_year_0,          function(r){ sum(values(r)) }))
 
 
     # plot
