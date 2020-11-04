@@ -304,7 +304,9 @@ dep_var_modified_timelapse
 
 
 
-Using `fullSimulation` function
+# Using `fullSimulation`
+
+This runs the full set of functions in the package with all default customization settings.
 
 ```{r using fullSimulation}
 
