@@ -141,7 +141,7 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
   colnames(resids) <- c('Residuals', 'Landcover')
 
   # plot
-  resids_plot <- ggplot(data = resids) + geom_density(aes(Residuals, color = Landcover, fill = Landcover), alpha = 0.6, size = 0.8) +
+  resids_plot <- ggplot(data = resids) + geom_histogram(aes(Residuals, color = Landcover, fill = Landcover), alpha = 0.8) +
     theme(text = element_text(size = 15)) +
     geom_vline(xintercept = 0, linetype = 'longdash') +
     labs(y = 'Number of points') +
