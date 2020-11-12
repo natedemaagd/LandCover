@@ -97,13 +97,19 @@ fullSimulation <- function(data,
   simPlots <- SimulationPlots(sim_results=landcover_sim, infest_val=landcover_invasive,
                               font_size = 15, n_grid = 6)
 
+  # LandCoverPlot priority maps
+  priorityPlots        <- list(landCoverPlot(raster=predVals$`Predicted values raster, change`),
+                               landCoverPlot(raster=landcover_sim$raster_dep_var_cumulative_change),
+                               landCoverPlot(raster=landcover_sim$raster_dep_var_cumulative_change_modified))
+  names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
+
 
 
 
   ##### return results
 
-  results_list        <- list(regression_results, predVals, landcover_sim, simPlots)
-  names(results_list) <- c('gls_spatial', 'gls_spatial_predict', 'LandCoverSpread', 'SimulationPlots')
+  results_list        <- list(regression_results, predVals, landcover_sim, simPlots, priorityPlots)
+  names(results_list) <- c('gls_spatial', 'gls_spatial_predict', 'LandCoverSpread', 'SimulationPlots', 'PriorityPlots')
 
   return(results_list)
 
