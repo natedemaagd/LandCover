@@ -98,9 +98,9 @@ fullSimulation <- function(data,
                               font_size = 15, n_grid = 6)
 
   # LandCoverPlot priority maps
-  priorityPlots        <- list(landCoverPlot(raster=predVals$`Predicted values raster, change`),
-                               landCoverPlot(raster=landcover_sim$raster_dep_var_cumulative_change),
-                               landCoverPlot(raster=landcover_sim$raster_dep_var_cumulative_change_modified))
+  priorityPlots        <- list(LandCoverPlot(predVals$`Predicted values raster, change`,               value_type = 'priority', decimal_points = 2),
+                               LandCoverPlot(landcover_sim$raster_dep_var_cumulative_change,           value_type = 'priority', decimal_points = 2),
+                               LandCoverPlot(landcover_sim$raster_dep_var_cumulative_change_modified,  value_type = 'priority', decimal_points = 2))
   names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
 
 
