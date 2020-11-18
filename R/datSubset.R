@@ -31,7 +31,7 @@ datSubset <- function(data, x, y, shp_reg, shp_app = NULL, sample = NULL) {
   shp_app <- spTransform(shp_app, CRSobj = shp_reg@proj4string)
 
   # subset the spatial points according to shp_reg and shp_app
-                       datSpReg <- datSp[shp_reg,]
+                         datSpReg <- datSp[shp_reg,]
   if(!is.null(shp_app)){ datSpApp <- datSp[shp_app,]} else { datSpApp <- datSpReg }
 
   # if `sample` is specified, sample the regression data
