@@ -12,7 +12,7 @@
 #' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`.
 #' @param sample integer. If the regression data are large, you may wish to sample the rows for the `gls_spatial` function.
 #'
-#' @return A `data.frame`
+#' @return A list of two `data.frames`. The first is a `data.frame` with all points subsetted using the `shp_reg` shapefile. The second is a `data.frame` with all points subsetted using the `shp_app` or `shp_reg` shapefile, as appropriate.
 #'
 #' @details Subsets a `data.frame` according to provided `shapefiles`. The
 #'
