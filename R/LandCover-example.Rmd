@@ -107,7 +107,7 @@ summary(regression_results$`Regression results`$`2`)
 
 # plot residuals
 plot(regression_results$`Residuals plot`)
-ggsave('C:/Users/nated/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/residPlot.png', dpi = 300)
+#ggsave('D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Figures/residPlot.png', dpi = 300)
 
 # we don't need anything other than the data and regression results now, so delete everything other than those two things
 rm(list=setdiff(ls(), c('dat', 'regression_results')))
