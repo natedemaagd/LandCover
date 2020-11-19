@@ -34,6 +34,9 @@
 
 ### FUNCTION:
 fullSimulation <- function(data,
+                           shp_reg = NULL,
+                           shp_app = NULL,
+                           dat_sample = NULL,
                            landcover_varname,
                            landcover_vec,
                            reg_formula,
@@ -54,6 +57,12 @@ fullSimulation <- function(data,
 
 
   ##### define variables
+
+  # datSubset
+  data=data
+  shp_reg=shp_reg
+  shp_app=shp_app
+  dat_sample=dat_sample
 
   # gls_spatial
   data=data
@@ -79,10 +88,15 @@ fullSimulation <- function(data,
 
   ##### run full simulation
 
+  # dat subset
+  if(!is.null(shp_reg)){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=sample) }
+
   # gls_spatial
+  if(!is.null(shp_reg)){ data = data_subset$RegressionData}  # if a subset was used, only use the regression data subset
   regression_results <- gls_spatial(data=data, landcover_varname=landcover_varname, landcover_vec=landcover_vec, reg_formula=reg_formula, error_formula=error_formula, num_cores=num_cores, silent = TRUE)
 
   # gls_spatial_predict
+  if(!is.null(shp_reg)){ data = dat_subset$SimulationData}  # if a subset was used, only use the simulation data subset
   predVals <- gls_spatial_predict(data=data, regression_results=regression_results, landcover_varname=landcover_varname, landcover_invasive=landcover_invasive, landcover_susceptible=landcover_susceptible,
                                   dep_varname=dep_varname, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname)
 
