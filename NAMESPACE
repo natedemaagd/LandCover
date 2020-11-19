@@ -3,6 +3,7 @@
 export(LandCoverPlot)
 export(LandCoverSpread)
 export(SimulationPlots)
+export(datSubset)
 export(fullSimulation)
 export(gls_spatial)
 export(gls_spatial_predict)

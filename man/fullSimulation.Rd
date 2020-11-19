@@ -6,6 +6,9 @@
 \usage{
 fullSimulation(
   data,
+  shp_reg = NULL,
+  shp_app = NULL,
+  dat_sample = NULL,
   landcover_varname,
   landcover_vec,
   reg_formula,

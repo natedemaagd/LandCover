@@ -2,7 +2,7 @@
 #'
 #' This function runs the entire simulation by wrapping all other functions into a single function, accepting all default customization options
 #'
-#' @import nlme doParallel foreach parallel viridis
+#' @import nlme doParallel foreach parallel viridis rgdal sp
 #' @importFrom foreach %dopar%
 #'
 #' @param data `data.frame` with spatial data
