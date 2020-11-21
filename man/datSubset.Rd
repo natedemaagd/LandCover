@@ -4,10 +4,18 @@
 \alias{datSubset}
 \title{Run spatial GLS models with optimal spatial correlation structure.}
 \usage{
-datSubset(data, x, y, shp_reg, shp_app = NULL, sample = NULL)
+datSubset(
+  data,
+  x,
+  y,
+  shp_reg,
+  shp_app = NULL,
+  sample = NULL,
+  convertFromUTM = FALSE
+)
 }
 \arguments{
-\item{data}{\code{data.frame} with spatial data}
+\item{data}{\code{data.frame} with spatial data. Coordinates must be in latitude and logitude (decimal degrees)}
 
 \item{x}{chr string specifying the x-coordinates in \code{data}}
 
@@ -18,6 +26,8 @@ datSubset(data, x, y, shp_reg, shp_app = NULL, sample = NULL)
 \item{shp_app}{\code{shapefile} outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}.}
 
 \item{sample}{integer. If the regression data are large, you may wish to sample the rows for the \code{gls_spatial} function.}
+
+\item{convertFromUTM}{logical. Set to \code{TRUE} if your shapfile(s) are in UTM coordinates.}
 }
 \value{
 A list of two \code{data.frames}. The first is a \code{data.frame} with all points subsetted using the \code{shp_reg} shapefile. The second is a \code{data.frame} with all points subsetted using the \code{shp_app} or \code{shp_reg} shapefile, as appropriate.
