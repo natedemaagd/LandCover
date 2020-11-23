@@ -5,7 +5,7 @@
 \title{Run spatial GLS models with optimal spatial correlation structure.}
 \usage{
 datSubset(
-  data,
+  data_directory,
   x,
   y,
   shp_reg,
@@ -15,7 +15,7 @@ datSubset(
 )
 }
 \arguments{
-\item{data}{\code{data.frame} with spatial data. Coordinates must be in latitude and logitude (decimal degrees)}
+\item{data_directory}{chr string specifying the local directory for an xlsx file that can be converted to a spatial \code{data.frame}. Coordinates must be in latitude and longitude (decimal degrees)}
 
 \item{x}{chr string specifying the x-coordinates in \code{data}}
 
@@ -23,7 +23,7 @@ datSubset(
 
 \item{shp_reg}{\code{shapefile} outlining the area of \code{data} to be used for the regression}
 
-\item{shp_app}{\code{shapefile} outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}.}
+\item{shp_app}{\code{shapefile} outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}}
 
 \item{sample}{integer. If the regression data are large, you may wish to sample the rows for the \code{gls_spatial} function.}
 

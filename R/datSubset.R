@@ -2,14 +2,14 @@
 #'
 #' This function runs a GLS model on a spatial dataset. It chooses among five types of correlation structure, and returns the model with the lowest AIC.
 #'
-#' @import rgdal sp
+#' @import rgdal sp readxl
 #' @importFrom foreach %dopar%
 #'
-#' @param data `data.frame` with spatial data. Coordinates must be in latitude and logitude (decimal degrees)
+#' @param data_directory chr string specifying the local directory for an xlsx file that can be converted to a spatial `data.frame`. Coordinates must be in latitude and longitude (decimal degrees)
 #' @param x chr string specifying the x-coordinates in `data`
 #' @param y chr string specifying the y-coordinates in `data`
 #' @param shp_reg `shapefile` outlining the area of `data` to be used for the regression
-#' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`.
+#' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`
 #' @param sample integer. If the regression data are large, you may wish to sample the rows for the `gls_spatial` function.
 #' @param convertFromUTM logical. Set to `TRUE` if your shapfile(s) are in UTM coordinates.
 #'
@@ -23,7 +23,10 @@
 
 
 ### FUNCTION:
-datSubset <- function(data, x, y, shp_reg, shp_app = NULL, sample = NULL, convertFromUTM = FALSE) {
+datSubset <- function(data_directory, x, y, shp_reg, shp_app = NULL, sample = NULL, convertFromUTM = FALSE) {
+
+  # load data
+  data <- readxl::read_xlsx(data_directory)
 
   # convert from UTM to lat/lon, if specified
   if(convertFromUTM){ shp_reg <- spTransform(shp_reg, CRS("+proj=longlat +datum=WGS84")) }

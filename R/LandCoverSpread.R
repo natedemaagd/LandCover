@@ -56,7 +56,7 @@
 
 ### FUNCTION:
 
-LandCoverSpread <- function(infest_val, suscep_val, spread_rate, birdcell, simlength, simulation_count, lc_raster, dep_var_raster_initial, dep_var_raster_pred, dep_var_modifier = NA, silent = FALSE) {
+LandCoverSpread <- function(infest_val, suscep_val, spread_rate, birdcell = 0, simlength, simulation_count, lc_raster, dep_var_raster_initial, dep_var_raster_pred, dep_var_modifier = NA, silent = FALSE) {
 
 
 

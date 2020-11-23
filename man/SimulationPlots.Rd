@@ -7,6 +7,7 @@
 SimulationPlots(
   sim_results,
   infest_val,
+  suscep_val,
   dep_var_modified = TRUE,
   dep_var_label = "dep_var",
   dep_var_modified_label = "dep_var_modified",
@@ -16,13 +17,17 @@ SimulationPlots(
   color_labels = c("Dep. var.", "Modified dep. var."),
   flip_colors = FALSE,
   decimal_places = 2,
+  infest_label = "Invasive",
+  suscep_label = "Susceptible",
   n_grid = NA
 )
 }
 \arguments{
 \item{sim_results}{list. The results of the \code{LandCoverSpread} function.}
 
-\item{infest_val}{value. The value of the invasive landcover.}
+\item{infest_val}{numerical. The value of the invasive landcover.}
+
+\item{suscep_val}{numerical. Vector of landcover values that are susceptible to the spread.}
 
 \item{dep_var_modified}{logical. If \code{TRUE}, creates line graphs with added modified dependent variable from the simulation. Requires \code{dep_var_modifier} to be specified in \code{LandCoverSpread}.}
 

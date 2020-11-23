@@ -5,7 +5,8 @@
 #' @import sp tidyr rgdal raster ggplot2 viridis ggpubr
 #'
 #' @param sim_results list. The results of the `LandCoverSpread` function.
-#' @param infest_val value. The value of the invasive landcover.
+#' @param infest_val numerical. The value of the invasive landcover.
+#' @param suscep_val numerical. Vector of landcover values that are susceptible to the spread.
 #' @param dep_var_modified logical. If `TRUE`, creates line graphs with added modified dependent variable from the simulation. Requires `dep_var_modifier` to be specified in `LandCoverSpread`.
 #' @param color_labels character vector. If `dep_var_modified == TRUE`, specifies the labels for the dependent variable and the modified dependent variable.
 #' @param font_size value. Font size of text in the figure.
@@ -53,13 +54,15 @@
 
 ### FUNCTION:
 
-SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
+SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modified = TRUE,
                             dep_var_label = 'dep_var',
                             dep_var_modified_label = 'dep_var_modified',
                             font_size = 15, line_thickness = 0.8,
                             line_colors = viridis(2), color_labels = c('Dep. var.', 'Modified dep. var.'),
                             flip_colors = FALSE,
                             decimal_places = 2,
+                            infest_label = 'Invasive',
+                            suscep_label = 'Susceptible',
                             n_grid = NA){
 
 
@@ -77,15 +80,16 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
     df <- as.data.frame(sim_results$list_of_landcover_rasters[[i]], xy = TRUE)
 
 
-    # convert to invasive or non-invasive
-    df$landcover_category <- ifelse(df$landcover %in% infest_val, 'Non-native', 'Native')
+    # convert to invasive or non-invasive, then remove cells that are NA
+    df$landcover_category <- ifelse(df[,3] %in% infest_val, infest_label,
+                             ifelse(df[,3] %in% suscep_val, suscep_label, 'Other'))
 
     # get colors for landcovers
     lc_colors <- viridis(length(unique(df$landcover_category)))
     if(isTRUE(flip_colors)){ lc_colors = rev(lc_colors) }
 
     # plot
-    lc_plot_timelapse[[i]] <- ggplot(data = df) +
+    lc_plot_timelapse[[i]] <- ggplot(data = df[!is.na(df[,3]),]) +
 
       geom_raster(aes(x, y, fill = landcover_category)) +
 
@@ -132,17 +136,25 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
     # create data.frame from raster
     df_list[[i]] <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0[[i]], xy = TRUE)
 
+    # create breaks and labels for the plots, while checking to see if any change in dependent variable
+    legend_breaks = c(min(color_limits), mean(color_limits), max(color_limits))
+    if(length(unique(legend_breaks))==1){ legend_breaks[[1]] = legend_breaks[[1]]-1*10^{-1*decimal_places}
+                                          legend_breaks[[3]] = legend_breaks[[3]]+1*10^{-1*decimal_places} }
+    legend_labels = format(round(legend_breaks, digits = decimal_places), nsmall = decimal_places)
+
+
     # plot
     df <- df_list[[i]]
     colnames(df)[[3]] <- 'layer'
 
-    dep_var_plot_timelapse[[i]] <- ggplot(data = df) +
+    dep_var_plot_timelapse[[i]] <- ggplot(data = df[!is.na(df$layer),]) +
 
       geom_raster(aes(x, y, fill = layer)) +
 
-      scale_fill_gradient2(name = dep_var_label, limits = color_limits, low = fill_low, mid = fill_mid, high = fill_high,
-                           breaks = c(min(color_limits), mean(color_limits), max(color_limits)),
-                           labels = format(round(c(min(color_limits), mean(color_limits), max(color_limits)), digits = decimal_places), nsmall = decimal_places)) +
+      scale_fill_gradient2(name = dep_var_label, low = fill_low, mid = fill_mid, high = fill_high,
+                           limits = range(legend_breaks),
+                           breaks = legend_breaks,
+                           labels = ) +
 
       coord_equal() +
 
@@ -187,17 +199,24 @@ SimulationPlots <- function(sim_results, infest_val, dep_var_modified = TRUE,
       # create data.frame from raster
       df_list[[i]] <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0_modified[[i]], xy = TRUE)
 
+      # create breaks and labels for the plots, while checking to see if any change in dependent variable
+      legend_breaks = c(min(color_limits), mean(color_limits), max(color_limits))
+      if(length(unique(legend_breaks))==1){ legend_breaks[[1]] = legend_breaks[[1]]-1*10^{-1*decimal_places}
+      legend_breaks[[3]] = legend_breaks[[3]]+1*10^{-1*decimal_places} }
+      legend_labels = format(round(legend_breaks, digits = decimal_places), nsmall = decimal_places)
+
       # plot
       df <- df_list[[i]]
       colnames(df)[[3]] <- 'layer'
 
-      dep_var_modified_plot_timelapse[[i]] <- ggplot(data = df) +
+      dep_var_modified_plot_timelapse[[i]] <- ggplot(data = df[!is.na(df$layer),]) +
 
         geom_raster(aes(x, y, fill = layer)) +
 
-        scale_fill_gradient2(name = dep_var_modified_label, limits = color_limits, low = fill_low, mid = fill_mid, high = fill_high,
-                             breaks = c(min(color_limits), mean(color_limits), max(color_limits)),
-                             labels = format(round(c(min(color_limits), mean(color_limits), max(color_limits)), digits = decimal_places), nsmall = decimal_places)) +
+        scale_fill_gradient2(name = dep_var_modified_label, low = fill_low, mid = fill_mid, high = fill_high,
+                             limits = range(legend_breaks),
+                             breaks = legend_breaks,
+                             labels = legend_labels) +
 
         coord_equal() +
 

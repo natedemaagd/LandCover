@@ -9,7 +9,7 @@ Authors@R:
            comment = c(ORCID = 0000-0001-7558-0685))
 Description: This package is intended to model the spread of land covers, and estimate the corresponding effect on water yield and aquifer recharge.
 License: MIT + file LICENSE
-Imports: nlme, doParallel, foreach, parallel
+Imports: RColorBrewer, doParallel, foreach, ggplot2, ggpubr, nlme, parallel, raster, rasterVis, readxl, rgdal, sp, tidyr, viridis
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

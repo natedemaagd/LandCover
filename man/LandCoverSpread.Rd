@@ -8,7 +8,7 @@ LandCoverSpread(
   infest_val,
   suscep_val,
   spread_rate,
-  birdcell,
+  birdcell = 0,
   simlength,
   simulation_count,
   lc_raster,
