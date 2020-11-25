@@ -13,10 +13,13 @@
 #' @param dep_varname character string. Name of the dependent variable in `data`.
 #' @param x_coords_varname character string. Name of the x-coordinate variable in `data`.
 #' @param y_coords_varname character string. Name of the y-coordinate variable in `data`.
+#' @param val_adjustment list. List specifying change in covariate vales. See details.
 #'
 #' @return A list of predicted values for current landcover, invaded landcover, and the associated rasters.
 #'
 #' @details This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the `regression_results` parameter. It returns a list of four objects: (1)a vector of predicted values under the current landcover; (2) a vector of predicted values assuming the invasive landcover takes the place of all susceptible landcovers; (3) a raster of predicted values under the current landcover; and (4) a raster of predicted values assuming the invasive landcover takes the place of all susceptible landcovers.
+#'
+#' For `val_adjustment`: If, after invasion of a pixel, a covariate `var1` needs to be changed to some value `a`, you would specify `val_adjustment = list('var1', a)`. If two or more variables need to be adjusted, you would specify a list of lists like so: `val_adjustment = list(list('var1', a), list('var2', b))`.
 #'
 #' @examples
 #' set.seed(1)
@@ -46,7 +49,33 @@
 
 
 ### FUNCTION:
-gls_spatial_predict <- function(data, regression_results, landcover_varname, landcover_invasive, landcover_susceptible, dep_varname, x_coords_varname, y_coords_varname){
+gls_spatial_predict <- function(data, regression_results, landcover_varname, landcover_invasive, landcover_susceptible, dep_varname, x_coords_varname, y_coords_varname, val_adjustment = NULL){
+
+
+  # create new dataset
+  newdat <- data
+
+  # if an adjustment is specified, the changes have to be made to the input variables
+  if(!is.null(val_adjustment)){
+
+    # if only a single value needs to be adjusted (i.e. `val_adjustment` is a single-level list)
+    if(!is.list(val_adjustment[[1]])){
+
+      newdat[ newdat[,landcover_varname] %in% landcover_susceptible, val_adjustment[[1]] ] <- val_adjustment[[2]]
+
+    # if multiple values need to be adjusted (i.e. `val_adjustment` is a nested list)
+    } else {
+
+      for(i in 1:length(val_adjustment)){
+
+        newdat[ newdat[,landcover_varname] %in% landcover_susceptible, val_adjustment[[i]][[1]] ] <- val_adjustment[[i]][[2]]
+
+      }
+
+    }
+
+
+  }
 
 
   # get predicted values with current landcover for invasive and susceptible landcovers
@@ -57,7 +86,7 @@ gls_spatial_predict <- function(data, regression_results, landcover_varname, lan
     if(!(as.character(data[, landcover_varname][[i]]) %in% names(regression_results[[1]]))){ pred_val_current[[i]] <- data[i, dep_varname]}
 
     # otherwise, return the predicted value
-    else{ pred_val_current[[i]] <- predict(regression_results[[1]][names(regression_results[[1]]) == as.character(data[, landcover_varname][[i]])][[1]], newdata = data[i,])}
+    else{ pred_val_current[[i]] <- predict(regression_results[[1]][names(regression_results[[1]]) == as.character(data[, landcover_varname][[i]])][[1]], newdata = newdat[i,])}
 
   }
 
@@ -70,7 +99,7 @@ gls_spatial_predict <- function(data, regression_results, landcover_varname, lan
     if(!(as.character(data[, landcover_varname][[i]]) %in% names(regression_results[[1]]))){ pred_val_invaded[[i]] <- data[i, dep_varname]}
 
     # otherwise, return the predicted value
-    else{ pred_val_invaded[[i]] <- predict(regression_results[[1]][names(regression_results[[1]]) == as.character(landcover_invasive)][[1]], newdata = data[i,])}
+    else{ pred_val_invaded[[i]] <- predict(regression_results[[1]][names(regression_results[[1]]) == as.character(landcover_invasive)][[1]], newdata = newdat[i,])}
 
   }
 
