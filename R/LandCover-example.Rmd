@@ -124,7 +124,7 @@ rm(list=setdiff(ls(), c('dat', 'regression_results')))
 
 # Using `gls_spatial_predict`
 
-Before you get into changing the landcovers and predicting new values, you'll most likely want to get predicted values for your present-day dependent variable. This is because you'll want to compare the *expected* values of today to the *expected* values of the future. If you compare the *true* values of today with the *expected* values of the future, you may get some weird predicted changes that don't make ecological, biological, etc. sense. This could be because of measurement error in the given raster pixel, mis-classification, omitted variables, or any number of reasons.
+Before you get into changing the landcovers and predicting new values, you'll most likely want to get predicted values for your present-day dependent variable. This is because you'll want to compare the *expected* values of today to the *expected* values of the future. If you compare the *true* values of today with the *expected* values of the future, you may get some weird predicted changes that don't make ecological, biological, etc. sense. This could be because of measurement error in the given raster pixel, mis-classification, omitted variables, or any number of reasons. For this example, we use the `val_adjustment` option to adjust all invaded pixels' `temp` values to 80.
 
 The function returns a list of six objects: (1) a vector of the predicted values of the dependent variable given current landcover; (2) a vector of the predicted values of the dependent variable assuming invasion of all susceptible landcovers; (3) a vector of the change in predicted values; (3) - (6) rasters corresponding to the vectors (1) to (3).
 
@@ -136,7 +136,7 @@ NOTE: all landcovers that are not invasive or susceptible are given the original
 
 # predict values of ET before and after invasion
 pred_values <- gls_spatial_predict(data = dat, regression_results = regression_results, landcover_varname = 'landcover', landcover_invasive = 1, landcover_susceptible = 2,
-                                   dep_varname = 'ET', x_coords_varname = 'x', y_coords_varname = 'y')
+                                   dep_varname = 'ET', x_coords_varname = 'x', y_coords_varname = 'y', val_adjustment = list('temp', 80))
 
 
 # add predicted values to `dat`
