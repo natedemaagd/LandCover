@@ -52,7 +52,7 @@ The output is a list of rasters: landcover over time, dep var over time, modifie
 }
 \examples{
 # load packages
-library(LandCover); library(foreach)
+library(LandCover); library(foreach); library(raster)
 
 # initialize data.frame with coordinates
 dat <- expand.grid(x = 1:20, y = 1:20, KEEP.OUT.ATTRS = FALSE)
