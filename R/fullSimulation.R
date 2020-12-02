@@ -7,7 +7,7 @@
 #'
 #' @param data `data.frame` with spatial data
 #' @param shp_reg `shapefile` outlining the area of `data` to be used for the regression
-#' @param shp_app`shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`
+#' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`
 #' @param convertFromUTM logical. Set to `TRUE` if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates.
 #' @param landcover_varname character string specifying the landcover variable from `data`
 #' @param landcover_vec vector of all landcover types in `data$landcover_varname` to be analyzed. This should include the landcover that is spreading along with all landcovers that are susceptible to the spread.
