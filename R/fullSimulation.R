@@ -52,7 +52,7 @@ fullSimulation <- function(data,
                            spread_rate,
                            birdcell,
                            simlength,
-                           simulation_count,
+                           simulation_count = 1000,
                            dep_var_modifier,
                            num_cores = parallel::detectCores() - 1){
 
