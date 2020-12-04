@@ -8,14 +8,12 @@
 #' @param data `data.frame` with spatial data
 #' @param shp_reg `shapefile` outlining the area of `data` to be used for the regression
 #' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`
-#' @param convertFromUTM logical. Set to `TRUE` if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates.
+#' @param convertFromUTM logical. Set to `TRUE` if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates instead of lon/lat.
+#' @param dat_sample numerical. If specified, will take a sample of `n` observations for the regression (suggested if `shp_reg` has lots of observations)
 #' @param landcover_varname character string specifying the landcover variable from `data`
-#' @param landcover_vec vector of all landcover types in `data$landcover_varname` to be analyzed. This should include the landcover that is spreading along with all landcovers that are susceptible to the spread.
 #' @param landcover_invasive value. Numerical or character value of the invasive landcover.
 #' @param landcover_susceptible value. Numerical or character value(s) of the susceptible landcover(s). If more than one susceptible landcover, provide a vector `c()`.
 #' @param reg_formula regression formula to be used, as in `lm()`, with columns from `data` (e.g. `c ~ a + b`)
-#' @param error_formula one-sided formula specifying coordinate columns from `data` (e.g. `~ x + y`)
-#' @param dep_varname character string. Name of the dependent variable in `data`.
 #' @param x_coords_varname character string. Name of the x-coordinate variable in `data`.
 #' @param y_coords_varname character string. Name of the y-coordinate variable in `data`.
 #' @param spread_rate numerical. Value between 0 and 1 indicating the annual spread rate of the invading landcover.
@@ -39,6 +37,7 @@
 fullSimulation <- function(data,
                            shp_reg = NULL,
                            shp_app = NULL,
+                           convertFromUTM = FALSE,
                            dat_sample = NULL,
                            landcover_varname,
                            reg_formula,
@@ -66,16 +65,16 @@ fullSimulation <- function(data,
   dat_sample=dat_sample
 
   # gls_spatial
-  data=data
   landcover_varname=landcover_varname
-  landcover_vec=c(landcover_invasive, landcover_susceptible)
+  landcover_vec=c(landcover_invasive, landcover_susceptible)  # determine which LCs to run regression on based on provided invasive and susceptible landcovers
   reg_formula=reg_formula
-  error_formula=paste0('~', x_coords_varname, '+', y_coords_varname)
+  error_formula=paste0('~', x_coords_varname, '+', y_coords_varname)  # construct error formula from provided x and y coordinate variable names
   num_cores=num_cores
 
   # gls_spatial_predict
   landcover_invasive=landcover_invasive
   landcover_susceptible=landcover_susceptible
+  dep_varname=sub("\\~.*", "", gsub(" ", "", Reduce(paste, deparse(reg_formula))))  # take dep_varname from the regression formula already provided
 
   # LandCoverSpread
   spread_rate=spread_rate
@@ -91,7 +90,7 @@ fullSimulation <- function(data,
 
   # dat subset
   if(is.null(shp_reg) & !is.null(shp_app)){return('Error: If you provide `shp_app`, you must also provide `shp_reg`! If you have only one shapefile, set it to `shp_reg`.')}
-  if(!is.null(shp_reg)){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=sample) }
+  if(!is.null(shp_reg)){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
 
   # gls_spatial
   if(!is.null(shp_reg)){ data = data_subset$RegressionData}  # if a subset was used, only use the regression data subset
@@ -110,7 +109,7 @@ fullSimulation <- function(data,
                                    dep_var_modifier=dep_var_modifier, silent = TRUE)
 
   # SimulationPlots
-  simPlots <- SimulationPlots(sim_results=landcover_sim, infest_val=landcover_invasive,
+  simPlots <- SimulationPlots(sim_results=landcover_sim, infest_val=landcover_invasive, suscep_val=landcover_susceptible,
                               font_size = 15, n_grid = 6)
 
   # LandCoverPlot priority maps

@@ -8,11 +8,10 @@ fullSimulation(
   data,
   shp_reg = NULL,
   shp_app = NULL,
+  convertFromUTM = FALSE,
   dat_sample = NULL,
   landcover_varname,
-  landcover_vec,
   reg_formula,
-  error_formula,
   landcover_invasive,
   landcover_susceptible,
   dep_varname,
@@ -21,7 +20,7 @@ fullSimulation(
   spread_rate,
   birdcell,
   simlength,
-  simulation_count,
+  simulation_count = 1000,
   dep_var_modifier,
   num_cores = parallel::detectCores() - 1
 )
@@ -33,19 +32,17 @@ fullSimulation(
 
 \item{shp_app}{\code{shapefile} outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}}
 
+\item{convertFromUTM}{logical. Set to \code{TRUE} if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates instead of lon/lat.}
+
+\item{dat_sample}{numerical. If specified, will take a sample of \code{n} observations for the regression (suggested if \code{shp_reg} has lots of observations)}
+
 \item{landcover_varname}{character string specifying the landcover variable from \code{data}}
 
-\item{landcover_vec}{vector of all landcover types in \code{data$landcover_varname} to be analyzed. This should include the landcover that is spreading along with all landcovers that are susceptible to the spread.}
-
 \item{reg_formula}{regression formula to be used, as in \code{lm()}, with columns from \code{data} (e.g. \code{c ~ a + b})}
-
-\item{error_formula}{one-sided formula specifying coordinate columns from \code{data} (e.g. \code{~ x + y})}
 
 \item{landcover_invasive}{value. Numerical or character value of the invasive landcover.}
 
 \item{landcover_susceptible}{value. Numerical or character value(s) of the susceptible landcover(s). If more than one susceptible landcover, provide a vector \code{c()}.}
-
-\item{dep_varname}{character string. Name of the dependent variable in \code{data}.}
 
 \item{x_coords_varname}{character string. Name of the x-coordinate variable in \code{data}.}
 
@@ -62,8 +59,6 @@ fullSimulation(
 \item{dep_var_modifier}{numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)}
 
 \item{num_cores}{numerical. Number of cores for parallel processing, max 5}
-
-\item{convertFromUTM}{logical. Set to \code{TRUE} if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates.}
 }
 \value{
 A list of all objects returned by the individual functions
