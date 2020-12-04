@@ -2,10 +2,10 @@
 #'
 #' This function runs the entire simulation by wrapping all other functions into a single function, accepting all default customization options
 #'
-#' @import nlme doParallel foreach parallel viridis rgdal sp
+#' @import nlme doParallel foreach parallel viridis rgdal sp readxl
 #' @importFrom foreach %dopar%
 #'
-#' @param data `data.frame` with spatial data
+#' @param data character string specifying xlsx data (with directory)
 #' @param shp_reg `shapefile` outlining the area of `data` to be used for the regression
 #' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`
 #' @param convertFromUTM logical. Set to `TRUE` if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates instead of lon/lat.
@@ -34,7 +34,7 @@
 
 
 ### FUNCTION:
-fullSimulation <- function(data,
+fullSimulation <- function(data_directory,
                            shp_reg = NULL,
                            shp_app = NULL,
                            convertFromUTM = FALSE,
@@ -59,7 +59,7 @@ fullSimulation <- function(data,
   ##### define variables
 
   # datSubset
-  data=data
+  data_directory=data_directory
   shp_reg=shp_reg
   shp_app=shp_app
   dat_sample=dat_sample
@@ -88,16 +88,17 @@ fullSimulation <- function(data,
 
   ##### run full simulation
 
-  # dat subset
+  # dat subset - subset if specified, and then only if requested smaple size is less than the number of pixels in `shp_reg`
   if(is.null(shp_reg) & !is.null(shp_app)){return('Error: If you provide `shp_app`, you must also provide `shp_reg`! If you have only one shapefile, set it to `shp_reg`.')}
-  if(!is.null(shp_reg)){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
+  if(!is.null(shp_reg) & length(values(shp_reg)) > dat_sample){  data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
+  if(!is.null(shp_reg) & length(values(shp_reg)) <= dat_sample){ data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=NULL) }
+  if(is.null(shp_reg) & is.null(shp_app)){data <- readxl::read_xlsx(data_directory)}
 
   # gls_spatial
-  if(!is.null(shp_reg)){ data = data_subset$RegressionData}  # if a subset was used, only use the regression data subset
+  if(exists(data_subset)){ data = data_subset$RegressionData}  # if data were subsetted, use that for the regression
   regression_results <- gls_spatial(data=data, landcover_varname=landcover_varname, landcover_vec=landcover_vec, reg_formula=reg_formula, error_formula=error_formula, num_cores=num_cores, silent = TRUE)
 
   # gls_spatial_predict
-  if(!is.null(shp_reg)){ data = dat_subset$SimulationData}  # if a subset was used, only use the simulation data subset
   predVals <- gls_spatial_predict(data=data, regression_results=regression_results, landcover_varname=landcover_varname, landcover_invasive=landcover_invasive, landcover_susceptible=landcover_susceptible,
                                   dep_varname=dep_varname, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname)
 

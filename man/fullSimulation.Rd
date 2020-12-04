@@ -5,7 +5,7 @@
 \title{Run full simulation, accepting all defaults}
 \usage{
 fullSimulation(
-  data,
+  data_directory,
   shp_reg = NULL,
   shp_app = NULL,
   convertFromUTM = FALSE,
@@ -26,8 +26,6 @@ fullSimulation(
 )
 }
 \arguments{
-\item{data}{\code{data.frame} with spatial data}
-
 \item{shp_reg}{\code{shapefile} outlining the area of \code{data} to be used for the regression}
 
 \item{shp_app}{\code{shapefile} outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}}
@@ -59,6 +57,8 @@ fullSimulation(
 \item{dep_var_modifier}{numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)}
 
 \item{num_cores}{numerical. Number of cores for parallel processing, max 5}
+
+\item{data}{character string specifying xlsx data (with directory)}
 }
 \value{
 A list of all objects returned by the individual functions

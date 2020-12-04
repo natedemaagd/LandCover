@@ -52,8 +52,9 @@ ui <- fluidPage(
             column(4, numericInput("simulation_count", "Number of simulations", value = 100, min = 0, max = NA, step = 100))
           ),
           fluidRow(
-            column(6, numericInput("dep_var_modifier", "Dependent variable modifier", value = 0.5, min = NA, max = NA, step = 0.10)),
-            column(6, numericInput("num_cores", "Number of cores (max 5)", value = 5, min = 0, max = 5, step = 1))
+            column(4, numericInput("dep_var_modifier", "Dependent variable modifier", value = 0.5, min = NA, max = NA, step = 0.10)),
+            column(4, numericInput("sample", "Regression obs sample size", value = 5000, min = 1, step = 1)),
+            column(4, numericInput("num_cores", "Number of cores (max 5)", value = 5, min = 0, max = 5, step = 1))
           ),
 
       # Submit and download buttons
