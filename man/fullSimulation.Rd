@@ -5,7 +5,8 @@
 \title{Run full simulation, accepting all defaults}
 \usage{
 fullSimulation(
-  data_directory,
+  data_as_directories = FALSE,
+  data,
   shp_reg = NULL,
   shp_app = NULL,
   convertFromUTM = FALSE,
@@ -28,6 +29,8 @@ fullSimulation(
 )
 }
 \arguments{
+\item{data}{character string specifying xlsx data (with directory)}
+
 \item{shp_reg}{\code{shapefile} outlining the area of \code{data} to be used for the regression}
 
 \item{shp_app}{\code{shapefile} outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}}
@@ -61,8 +64,6 @@ fullSimulation(
 \item{covar_adjustment}{list. List specifying change in covariate values. See ?gls_spatial_predict.}
 
 \item{num_cores}{numerical. Number of cores for parallel processing, max 5}
-
-\item{data}{character string specifying xlsx data (with directory)}
 }
 \value{
 A list of all objects returned by the individual functions

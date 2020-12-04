@@ -5,7 +5,7 @@
 #' @import rgdal sp readxl
 #' @importFrom foreach %dopar%
 #'
-#' @param data_directory chr string specifying the local directory for an xlsx file that can be converted to a spatial `data.frame`. Coordinates must be in latitude and longitude (decimal degrees)
+#' @param data `data.frame` that can be converted to a spatial `data.frame`. Coordinates must be in latitude and longitude (decimal degrees)
 #' @param x chr string specifying the x-coordinates in `data`
 #' @param y chr string specifying the y-coordinates in `data`
 #' @param shp_reg `shapefile` outlining the area of `data` to be used for the regression
@@ -23,10 +23,7 @@
 
 
 ### FUNCTION:
-datSubset <- function(data_directory, x, y, shp_reg, shp_app = NULL, sample = NULL, convertFromUTM = FALSE) {
-
-  # load data
-  data <- readxl::read_xlsx(data_directory)
+datSubset <- function(data, x, y, shp_reg, shp_app = NULL, sample = NULL, convertFromUTM = FALSE) {
 
   # convert from UTM to lat/lon, if specified
   if(convertFromUTM){ shp_reg <- spTransform(shp_reg, CRS("+proj=longlat +datum=WGS84")) }

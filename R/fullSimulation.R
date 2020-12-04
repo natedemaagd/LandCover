@@ -35,7 +35,8 @@
 
 
 ### FUNCTION:
-fullSimulation <- function(data_directory,
+fullSimulation <- function(data_as_directories = FALSE,
+                           data,
                            shp_reg = NULL,
                            shp_app = NULL,
                            convertFromUTM = FALSE,
@@ -61,10 +62,22 @@ fullSimulation <- function(data_directory,
 
   ##### define variables
 
+  # if data are directories, load from directories. Otherwise, load from environment
+  if(data_as_directories){
+
+    data = readxl::read_xlsx(data)
+    if(exists('shp_reg')){ if(!is.null(shp_reg)){ shp_reg = raster::raster(shp_reg) }}
+    if(exists('shp_app')){ if(!is.null(shp_app)){ shp_app = raster::raster(shp_app) }}
+
+  } else {
+
+    data=data
+    shp_reg=shp_reg
+    shp_app=shp_app
+
+  }
+
   # datSubset
-  data_directory=data_directory
-  shp_reg=shp_reg
-  shp_app=shp_app
   dat_sample=dat_sample
 
   # gls_spatial
@@ -95,10 +108,10 @@ fullSimulation <- function(data_directory,
   # dat subset - subset if specified, and then only if requested smaple size is less than the number of pixels in `shp_reg`
   if(is.null(shp_reg) & !is.null(shp_app)){return('Error: If you provide `shp_app`, you must also provide `shp_reg`! If you have only one shapefile, set it to `shp_reg`.')}
   if(!is.null(shp_reg)){
-    if(length(raster::values(shp_reg)) >  dat_sample){ data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
-    if(length(raster::values(shp_reg)) <= dat_sample){ data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=NULL) }
+    if(length(raster::values(shp_reg)) >  dat_sample){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
+    if(length(raster::values(shp_reg)) <= dat_sample){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=NULL) }
     }
-  if(is.null(shp_reg) & is.null(shp_app)){data <- readxl::read_xlsx(data_directory)}
+  if(is.null(shp_reg) & is.null(shp_app)){data <- data}
 
   # convert all data from tibbles to data.frames
   data <- as.data.frame(data)

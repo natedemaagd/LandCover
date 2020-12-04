@@ -1,7 +1,8 @@
 
 library(LandCover)
 
-fullSim <- fullSimulation(data_directory = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/dat1.xlsx",
+fullSim <- fullSimulation(data_as_directories = TRUE,
+                          data = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/dat1.xlsx",
                           landcover_varname     = 'landcover',
                           landcover_invasive    = 1,
                           landcover_susceptible = 2,

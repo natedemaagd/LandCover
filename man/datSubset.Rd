@@ -5,7 +5,7 @@
 \title{Run spatial GLS models with optimal spatial correlation structure.}
 \usage{
 datSubset(
-  data_directory,
+  data,
   x,
   y,
   shp_reg,
@@ -15,7 +15,7 @@ datSubset(
 )
 }
 \arguments{
-\item{data_directory}{chr string specifying the local directory for an xlsx file that can be converted to a spatial \code{data.frame}. Coordinates must be in latitude and longitude (decimal degrees)}
+\item{data}{\code{data.frame} that can be converted to a spatial \code{data.frame}. Coordinates must be in latitude and longitude (decimal degrees)}
 
 \item{x}{chr string specifying the x-coordinates in \code{data}}
 
