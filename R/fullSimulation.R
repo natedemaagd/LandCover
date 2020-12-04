@@ -41,9 +41,7 @@ fullSimulation <- function(data,
                            shp_app = NULL,
                            dat_sample = NULL,
                            landcover_varname,
-                           landcover_vec,
                            reg_formula,
-                           error_formula,
                            landcover_invasive,
                            landcover_susceptible,
                            dep_varname,
@@ -70,9 +68,9 @@ fullSimulation <- function(data,
   # gls_spatial
   data=data
   landcover_varname=landcover_varname
-  landcover_vec=landcover_vec
+  landcover_vec=c(landcover_invasive, landcover_susceptible)
   reg_formula=reg_formula
-  error_formula=error_formula
+  error_formula=paste0('~', x_coords_varname, '+', y_coords_varname)
   num_cores=num_cores
 
   # gls_spatial_predict
@@ -92,7 +90,7 @@ fullSimulation <- function(data,
   ##### run full simulation
 
   # dat subset
-  if(is.null(shp_reg) & !is.null(shp_app)){return('Error: If you provide `shp_app`, you must also provide `shp_reg`!')}
+  if(is.null(shp_reg) & !is.null(shp_app)){return('Error: If you provide `shp_app`, you must also provide `shp_reg`! If you have only one shapefile, set it to `shp_reg`.')}
   if(!is.null(shp_reg)){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=sample) }
 
   # gls_spatial
