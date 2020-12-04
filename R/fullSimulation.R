@@ -21,6 +21,7 @@
 #' @param simlength integer. Number of years the simulation should run.
 #' @param simulation_count integer. Length of simulation bootstrap.
 #' @param dep_var_modifier numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)
+#' @param covar_adjustment list. List specifying change in covariate values. See ?gls_spatial_predict.
 #' @param num_cores numerical. Number of cores for parallel processing, max 5
 #'
 #' @return A list of all objects returned by the individual functions
@@ -46,11 +47,13 @@ fullSimulation <- function(data_directory,
                            dep_varname,
                            x_coords_varname,
                            y_coords_varname,
+                           val_adjustment = NULL,
                            spread_rate,
                            birdcell,
                            simlength,
                            simulation_count = 1000,
                            dep_var_modifier,
+                           covar_adjustment = NULL,
                            num_cores = parallel::detectCores() - 1){
 
 
@@ -75,6 +78,7 @@ fullSimulation <- function(data_directory,
   landcover_invasive=landcover_invasive
   landcover_susceptible=landcover_susceptible
   dep_varname=sub("\\~.*", "", gsub(" ", "", Reduce(paste, deparse(reg_formula))))  # take dep_varname from the regression formula already provided
+  covar_adjustment=covar_adjustment
 
   # LandCoverSpread
   spread_rate=spread_rate
@@ -90,17 +94,23 @@ fullSimulation <- function(data_directory,
 
   # dat subset - subset if specified, and then only if requested smaple size is less than the number of pixels in `shp_reg`
   if(is.null(shp_reg) & !is.null(shp_app)){return('Error: If you provide `shp_app`, you must also provide `shp_reg`! If you have only one shapefile, set it to `shp_reg`.')}
-  if(!is.null(shp_reg) & length(values(shp_reg)) > dat_sample){  data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
-  if(!is.null(shp_reg) & length(values(shp_reg)) <= dat_sample){ data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=NULL) }
+  if(!is.null(shp_reg)){
+    if(length(raster::values(shp_reg)) >  dat_sample){ data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
+    if(length(raster::values(shp_reg)) <= dat_sample){ data_subset <- datSubset(data_directory=data_directory, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=NULL) }
+    }
   if(is.null(shp_reg) & is.null(shp_app)){data <- readxl::read_xlsx(data_directory)}
 
+  # convert all data from tibbles to data.frames
+  data <- as.data.frame(data)
+  if(exists('data_subset')){ data_subset <- as.data.frame(data_subset) }
+
   # gls_spatial
-  if(exists(data_subset)){ data = data_subset$RegressionData}  # if data were subsetted, use that for the regression
+  if(exists('data_subset')){ data = data_subset$RegressionData}  # if data were subsetted, use that for the regression
   regression_results <- gls_spatial(data=data, landcover_varname=landcover_varname, landcover_vec=landcover_vec, reg_formula=reg_formula, error_formula=error_formula, num_cores=num_cores, silent = TRUE)
 
   # gls_spatial_predict
   predVals <- gls_spatial_predict(data=data, regression_results=regression_results, landcover_varname=landcover_varname, landcover_invasive=landcover_invasive, landcover_susceptible=landcover_susceptible,
-                                  dep_varname=dep_varname, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname)
+                                  dep_varname=dep_varname, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, covar_adjustment=covar_adjustment)
 
   # LandCoverSpread
   lc_raster <- rasterFromXYZ(data[c('x', 'y', landcover_varname)])  # convert landcover to raster

@@ -56,6 +56,9 @@ ui <- fluidPage(
             column(4, numericInput("sample", "Regression obs sample size", value = 5000, min = 1, step = 1)),
             column(4, numericInput("num_cores", "Number of cores (max 5)", value = 5, min = 0, max = 5, step = 1))
           ),
+          fluidRow(
+            column(12, textInput("covar_adjustment", "Covariate adjustment"))
+          ),
 
       # Submit and download buttons
       br(),

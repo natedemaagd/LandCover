@@ -17,11 +17,13 @@ fullSimulation(
   dep_varname,
   x_coords_varname,
   y_coords_varname,
+  val_adjustment = NULL,
   spread_rate,
   birdcell,
   simlength,
   simulation_count = 1000,
   dep_var_modifier,
+  covar_adjustment = NULL,
   num_cores = parallel::detectCores() - 1
 )
 }
@@ -55,6 +57,8 @@ fullSimulation(
 \item{simulation_count}{integer. Length of simulation bootstrap.}
 
 \item{dep_var_modifier}{numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)}
+
+\item{covar_adjustment}{list. List specifying change in covariate values. See ?gls_spatial_predict.}
 
 \item{num_cores}{numerical. Number of cores for parallel processing, max 5}
 

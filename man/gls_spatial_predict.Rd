@@ -13,7 +13,7 @@ gls_spatial_predict(
   dep_varname,
   x_coords_varname,
   y_coords_varname,
-  val_adjustment = NULL
+  covar_adjustment = NULL
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ gls_spatial_predict(
 
 \item{y_coords_varname}{character string. Name of the y-coordinate variable in \code{data}.}
 
-\item{val_adjustment}{list. List specifying change in covariate vales. See details.}
+\item{covar_adjustment}{list. List specifying change in covariate values. See details.}
 }
 \value{
 A list of predicted values for current landcover, invaded landcover, and the associated rasters.
@@ -44,7 +44,7 @@ After creating \code{gls} object(s) with the \code{gls_spatial()} function, this
 \details{
 This GLS predict function relies on a model created with the gls_spatial() function. It will not work if it is run independently (or before) the gls_spatial() function has been used to create the \code{regression_results} parameter. It returns a list of four objects: (1)a vector of predicted values under the current landcover; (2) a vector of predicted values assuming the invasive landcover takes the place of all susceptible landcovers; (3) a raster of predicted values under the current landcover; and (4) a raster of predicted values assuming the invasive landcover takes the place of all susceptible landcovers.
 
-For \code{val_adjustment}: If, after invasion of a pixel, a covariate \code{var1} needs to be changed to some value \code{a}, you would specify \code{val_adjustment = list('var1', a)}. If two or more variables need to be adjusted, you would specify a list of lists like so: \code{val_adjustment = list(list('var1', a), list('var2', b))}.
+For \code{covar_adjustment}: If, after invasion of a pixel, a covariate \code{var1} needs to be changed to some value \code{a}, you would specify \code{covar_adjustment = list('var1', a)}. If two or more variables need to be adjusted, you would specify a list of lists like so: \code{covar_adjustment = list(list('var1', a), list('var2', b))}.
 }
 \examples{
 set.seed(1)
