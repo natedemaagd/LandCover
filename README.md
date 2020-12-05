@@ -5,7 +5,7 @@ There are many functions in this package. See the [wiki](https://github.com/nate
 
 
 ## Installation and usage
-As logn as you have the `devtools` package installed, the `LandCover` package in its current state can be installed with the command `devtools::install_github('natedemaagd/LandCover')`. Then, load it like any package using `library(LandCover)`. If you first need to install `devtools`, you may need to restart your R session before it works. There is also a known issue with the `rgdal` dependeny for Mac users with the new Big Sur update, so this packwage will not work correctly until that is fixed.
+As long as you have the `devtools` package installed, the `LandCover` package in its current state can be installed with the command `devtools::install_github('natedemaagd/LandCover')`. Then, load it like any package using `library(LandCover)`. If you first need to install `devtools`, you may need to restart your R session before it works. There is also a known issue with the `rgdal` dependeny for Mac users with the new Big Sur update, so this packwage will not work correctly until that is fixed.
 
 
 ## Functions list
