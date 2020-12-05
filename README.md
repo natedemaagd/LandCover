@@ -1,6 +1,6 @@
 # LandCover
 
-**NOTE:** Substantial changes are being made to this package in preparation for implementation with a web app intended for use by non-R users. If using this package in R, see updated documentation there. Documentation for the functions will be updated once all changes have been finalized. Some functions may not work as expected during this process.
+**NOTE:** Substantial changes are being made to this package in preparation for implementation with a web app intended for use by non-R users. If using this package in R, see updated documentation there. Documentation on this site will be updated once all changes have been finalized. Some functions may not work as expected during this process.
 
 This R package simulates landcover spread and the associated changes to water yield and recharge (or any other landcover-dependent spatial regressions you're interested in).
 
