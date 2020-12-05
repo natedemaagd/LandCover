@@ -1,4 +1,5 @@
-data_directory = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/dat1.xlsx"
+data_as_directories = TRUE
+data = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/dat1.xlsx"
 landcover_varname     = 'landcover'
 landcover_invasive    = 1
 landcover_susceptible = 2
@@ -16,3 +17,4 @@ convertFromUTM = FALSE
 dat_sample = NULL
 simulation_count = 1000
 num_cores = 5
+covar_adjustment = NULL

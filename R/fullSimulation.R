@@ -117,6 +117,12 @@ fullSimulation <- function(data_as_directories = FALSE,
   data <- as.data.frame(data)
   if(exists('data_subset')){ data_subset <- as.data.frame(data_subset) }
 
+  # convert landcover codes to character
+  data[,landcover_varname] <- as.character(data[,landcover_varname])
+  if(exists('data_subset')){ data_subset[,landcover_varname] <- as.character(data_subset[,landcover_varname]) }
+  landcover_invasive    <- as.character(landcover_invasive)
+  landcover_susceptible <- as.character(landcover_susceptible)
+
   # gls_spatial
   if(exists('data_subset')){ data = data_subset$RegressionData}  # if data were subsetted, use that for the regression
   regression_results <- gls_spatial(data=data, landcover_varname=landcover_varname, landcover_vec=landcover_vec, reg_formula=reg_formula, error_formula=error_formula, num_cores=num_cores, silent = TRUE)
