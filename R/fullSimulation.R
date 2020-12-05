@@ -5,9 +5,12 @@
 #' @import nlme doParallel foreach parallel viridis rgdal sp readxl
 #' @importFrom foreach %dopar%
 #'
-#' @param data character string specifying xlsx data (with directory)
-#' @param shp_reg `shapefile` outlining the area of `data` to be used for the regression
-#' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`
+#' @param data_as_directories logical. `TRUE` if data and shapefiles must be loaded from files. `FALSE` if data and shapefiles are `R` objects already loaded in the environment.
+#' @param data `data.frame` if data is in environement, or character string specifying location of xlsx data with directory if `data_as_directories = TRUE`
+#' @param shp_reg_directory character string specifying directory of shapefile outlining the area of `data` to be used for the regression. `NULL` if `data_as_directories = FALSE`
+#' @param shp_reg_layer character string specifying layer (.shp) filename corresponding to `shp_reg_directory`, or spatial polygon object if `data_as_directories = FALSE`
+#' @param shp_app_directory character string specifying directory of shapefile outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`.  `NULL` if `data_as_directories = FALSE`
+#' @param shp_app_layer character string specifying layer (.shp) filename corresponding to `shp_app_directory`, or spatial polygon object if `data_as_directories = FALSE`
 #' @param convertFromUTM logical. Set to `TRUE` if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates instead of lon/lat.
 #' @param dat_sample numerical. If specified, will take a sample of `n` observations for the regression (suggested if `shp_reg` has lots of observations)
 #' @param landcover_varname character string specifying the landcover variable from `data`
@@ -37,8 +40,10 @@
 ### FUNCTION:
 fullSimulation <- function(data_as_directories = FALSE,
                            data,
-                           shp_reg = NULL,
-                           shp_app = NULL,
+                           shp_reg_directory = NULL,
+                           shp_reg_layer = NULL,
+                           shp_app_directory = NULL,
+                           shp_app_layer = NULL,
                            convertFromUTM = FALSE,
                            dat_sample = NULL,
                            landcover_varname,
@@ -66,14 +71,14 @@ fullSimulation <- function(data_as_directories = FALSE,
   if(data_as_directories){
 
     data = readxl::read_xlsx(data)
-    if(exists('shp_reg')){ if(!is.null(shp_reg)){ shp_reg = raster::raster(shp_reg) }}
-    if(exists('shp_app')){ if(!is.null(shp_app)){ shp_app = raster::raster(shp_app) }}
+    if(exists('shp_reg_directory')){ if(!is.null(shp_reg_directory)){ shp_reg = readOGR(dsn = shp_reg_directory, layer = shp_reg_layer) }}
+    if(exists('shp_app_directory')){ if(!is.null(shp_app_directory)){ shp_app = readOGR(dsn = shp_app_directory, layer = shp_app_layer) }}
 
   } else {
 
     data=data
-    shp_reg=shp_reg
-    shp_app=shp_app
+    shp_reg=shp_reg_layer
+    shp_app=shp_app_layer
 
   }
 
@@ -106,12 +111,12 @@ fullSimulation <- function(data_as_directories = FALSE,
   ##### run full simulation
 
   # dat subset - subset if specified, and then only if requested smaple size is less than the number of pixels in `shp_reg`
-  if(is.null(shp_reg) & !is.null(shp_app)){return('Error: If you provide `shp_app`, you must also provide `shp_reg`! If you have only one shapefile, set it to `shp_reg`.')}
-  if(!is.null(shp_reg)){
-    if(length(raster::values(shp_reg)) >  dat_sample){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample) }
-    if(length(raster::values(shp_reg)) <= dat_sample){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=NULL) }
+  if(is.null(shp_reg_layer) & !is.null(shp_app_layer)){return('Error: If you provide `shp_app_layer`, you must also provide `shp_reg_layer`! If you have only one shapefile, set it to `shp_reg`.')}
+  if(!is.null(shp_reg_layer)){
+    if(nrow(shp_reg_layer) >  dat_sample){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg_layer, shp_app=shp_app_layer, sample=dat_sample) }
+    if(nrow(shp_reg_layer) <= dat_sample){ data_subset <- data }
     }
-  if(is.null(shp_reg) & is.null(shp_app)){data <- data}
+  if(is.null(shp_reg_layer) & is.null(shp_app_layer)){data <- data}
 
   # convert all data from tibbles to data.frames
   data <- as.data.frame(data)
@@ -132,7 +137,7 @@ fullSimulation <- function(data_as_directories = FALSE,
                                   dep_varname=dep_varname, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, covar_adjustment=covar_adjustment)
 
   # LandCoverSpread
-  lc_raster <- rasterFromXYZ(data[c('x', 'y', landcover_varname)])  # convert landcover to raster
+  lc_raster <- raster::rasterFromXYZ(data[c('x', 'y', landcover_varname)])  # convert landcover to raster
   landcover_sim <- LandCoverSpread(infest_val=landcover_invasive, suscep_val=landcover_susceptible, spread_rate=spread_rate, birdcell=birdcell, simlength=simlength, simulation_count=simulation_count,
                                    lc_raster=lc_raster, dep_var_raster_initial=predVals$`Predicted values raster, current landcover`,
                                    dep_var_raster_pred=predVals$`Predicted values raster, post-invasion`,

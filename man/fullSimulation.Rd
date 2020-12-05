@@ -7,8 +7,10 @@
 fullSimulation(
   data_as_directories = FALSE,
   data,
-  shp_reg = NULL,
-  shp_app = NULL,
+  shp_reg_directory = NULL,
+  shp_reg_layer = NULL,
+  shp_app_directory = NULL,
+  shp_app_layer = NULL,
   convertFromUTM = FALSE,
   dat_sample = NULL,
   landcover_varname,
@@ -29,11 +31,17 @@ fullSimulation(
 )
 }
 \arguments{
-\item{data}{character string specifying xlsx data (with directory)}
+\item{data_as_directories}{logical. \code{TRUE} if data and shapefiles must be loaded from files. \code{FALSE} if data and shapefiles are \code{R} objects already loaded in the environment.}
 
-\item{shp_reg}{\code{shapefile} outlining the area of \code{data} to be used for the regression}
+\item{data}{\code{data.frame} if data is in environement, or character string specifying location of xlsx data with directory if \code{data_as_directories = TRUE}}
 
-\item{shp_app}{\code{shapefile} outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}}
+\item{shp_reg_directory}{character string specifying directory of shapefile outlining the area of \code{data} to be used for the regression. \code{NULL} if \code{data_as_directories = FALSE}}
+
+\item{shp_reg_layer}{character string specifying layer (.shp) filename corresponding to \code{shp_reg_directory}, or spatial polygon object if \code{data_as_directories = FALSE}}
+
+\item{shp_app_directory}{character string specifying directory of shapefile outlining the area of \code{data} to which the final simulation will be applied, if different from \code{shp_reg}.  \code{NULL} if \code{data_as_directories = FALSE}}
+
+\item{shp_app_layer}{character string specifying layer (.shp) filename corresponding to \code{shp_app_directory}, or spatial polygon object if \code{data_as_directories = FALSE}}
 
 \item{convertFromUTM}{logical. Set to \code{TRUE} if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates instead of lon/lat.}
 
