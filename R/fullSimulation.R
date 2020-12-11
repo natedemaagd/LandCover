@@ -50,16 +50,14 @@ fullSimulation <- function(data_as_directories = FALSE,
                            reg_formula,
                            landcover_invasive,
                            landcover_susceptible,
-                           dep_varname,
                            x_coords_varname,
                            y_coords_varname,
-                           val_adjustment = NULL,
                            spread_rate,
                            birdcell,
                            simlength,
-                           simulation_count = 1000,
+                           simulation_count = 100,
                            dep_var_modifier,
-                           covar_adjustment = NULL,
+                           covar_adjustment = NA,
                            num_cores = parallel::detectCores() - 1){
 
 
@@ -110,13 +108,35 @@ fullSimulation <- function(data_as_directories = FALSE,
 
   ##### run full simulation
 
-  # dat subset - subset if specified, and then only if requested smaple size is less than the number of pixels in `shp_reg`
+
+
+  ### dat subset - subset if specified, and then only if requested sample size is less than the number of pixels in `shp_reg`
+
+  # if regression shapefile NOT provided and application shapefile provided, return error
   if(is.null(shp_reg_layer) & !is.null(shp_app_layer)){return('Error: If you provide `shp_app_layer`, you must also provide `shp_reg_layer`! If you have only one shapefile, set it to `shp_reg`.')}
-  if(!is.null(shp_reg_layer)){
-    if(nrow(shp_reg_layer) >  dat_sample){ data_subset <- datSubset(data=data, x=x_coords_varname, y=y_coords_varname, shp_reg=shp_reg_layer, shp_app=shp_app_layer, sample=dat_sample) }
+
+  # if regression shapefile provided and sample size provided, sample data
+  if(!is.null(shp_reg_layer) & !is.null(dat_sample)){
+    if(nrow(shp_reg_layer) >  dat_sample){ data_subset <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
+                                           data_subset <- dataSubset$RegressionData}
     if(nrow(shp_reg_layer) <= dat_sample){ data_subset <- data }
-    }
-  if(is.null(shp_reg_layer) & is.null(shp_app_layer)){data <- data}
+  }
+
+  # if regression shapefile provided and sample size NOT provided, sample data
+  if(!is.null(shp_reg_layer) & is.null(dat_sample)){
+                                           data_subset <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
+                                           data_subset <- data_subset$RegressionData
+  }
+
+  # if no shapefiles are provided, sample only using samepl size, if it's provided
+  if(is.null(shp_reg_layer) & is.null(shp_app_layer)){
+
+    data <- data
+
+  }
+
+
+
 
   # convert all data from tibbles to data.frames
   data <- as.data.frame(data)
@@ -129,7 +149,7 @@ fullSimulation <- function(data_as_directories = FALSE,
   landcover_susceptible <- as.character(landcover_susceptible)
 
   # gls_spatial
-  if(exists('data_subset')){ data = data_subset$RegressionData}  # if data were subsetted, use that for the regression
+  if(exists('data_subset')){ data = data_subset}  # if data were subsetted, use that for the regression
   regression_results <- gls_spatial(data=data, landcover_varname=landcover_varname, landcover_vec=landcover_vec, reg_formula=reg_formula, error_formula=error_formula, num_cores=num_cores, silent = TRUE)
 
   # gls_spatial_predict

@@ -6,8 +6,8 @@
 #' @importFrom foreach %dopar%
 #'
 #' @param data `data.frame` that can be converted to a spatial `data.frame`. Coordinates must be in latitude and longitude (decimal degrees)
-#' @param x chr string specifying the x-coordinates in `data`
-#' @param y chr string specifying the y-coordinates in `data`
+#' @param x_coords_varname chr string specifying the x-coordinates in `data`
+#' @param y_coords_varname chr string specifying the y-coordinates in `data`
 #' @param shp_reg `shapefile` outlining the area of `data` to be used for the regression
 #' @param shp_app `shapefile` outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`
 #' @param sample integer. If the regression data are large, you may wish to sample the rows for the `gls_spatial` function.
@@ -23,13 +23,13 @@
 
 
 ### FUNCTION:
-datSubset <- function(data, x, y, shp_reg, shp_app = NULL, sample = NULL, convertFromUTM = FALSE) {
+datSubset <- function(data, x_coords_varname, y_coords_varname, shp_reg, shp_app = NULL, sample = NULL, convertFromUTM = FALSE) {
 
   # convert from UTM to lat/lon, if specified
   if(convertFromUTM){ shp_reg <- spTransform(shp_reg, CRS("+proj=longlat +datum=WGS84")) }
 
   # convert data to spatial points
-  datSp <- sp::SpatialPointsDataFrame(coords = data[c(x, y)], data = data, proj4string = shp_reg@proj4string)
+  datSp <- sp::SpatialPointsDataFrame(coords = data[c(x_coords_varname, y_coords_varname)], data = data, proj4string = shp_reg@proj4string)
 
   # convert CRS of shp_app, if present
   if(!is.null(shp_app)){ shp_app <- sp::spTransform(shp_app, CRSobj = shp_reg@proj4string) }
@@ -43,7 +43,7 @@ datSubset <- function(data, x, y, shp_reg, shp_app = NULL, sample = NULL, conver
 
   # return results
   results <- list(datSpReg, datSpApp)
-  results <- lapply(results, as.data.frame)
+  results <- lapply(results, function(df){ as.data.frame(df@data)})
   names(results) <- c('RegressionData', 'SimulationData')
 
   return(results)

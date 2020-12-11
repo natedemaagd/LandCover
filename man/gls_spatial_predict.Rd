@@ -13,7 +13,7 @@ gls_spatial_predict(
   dep_varname,
   x_coords_varname,
   y_coords_varname,
-  covar_adjustment = NULL
+  covar_adjustment = NA
 )
 }
 \arguments{

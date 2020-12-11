@@ -6,8 +6,8 @@
 \usage{
 datSubset(
   data,
-  x,
-  y,
+  x_coords_varname,
+  y_coords_varname,
   shp_reg,
   shp_app = NULL,
   sample = NULL,
@@ -17,9 +17,9 @@ datSubset(
 \arguments{
 \item{data}{\code{data.frame} that can be converted to a spatial \code{data.frame}. Coordinates must be in latitude and longitude (decimal degrees)}
 
-\item{x}{chr string specifying the x-coordinates in \code{data}}
+\item{x_coords_varname}{chr string specifying the x-coordinates in \code{data}}
 
-\item{y}{chr string specifying the y-coordinates in \code{data}}
+\item{y_coords_varname}{chr string specifying the y-coordinates in \code{data}}
 
 \item{shp_reg}{\code{shapefile} outlining the area of \code{data} to be used for the regression}
 

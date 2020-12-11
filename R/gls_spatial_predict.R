@@ -49,14 +49,14 @@
 
 
 ### FUNCTION:
-gls_spatial_predict <- function(data, regression_results, landcover_varname, landcover_invasive, landcover_susceptible, dep_varname, x_coords_varname, y_coords_varname, covar_adjustment = NULL){
+gls_spatial_predict <- function(data, regression_results, landcover_varname, landcover_invasive, landcover_susceptible, dep_varname, x_coords_varname, y_coords_varname, covar_adjustment = NA){
 
 
   # create new dataset
   newdat <- data
 
   # if an adjustment is specified, the changes have to be made to the input variables
-  if(!is.null(covar_adjustment)){
+  if(!is.na(covar_adjustment)){
 
     # if only a single value needs to be adjusted (i.e. `covar_adjustment` is a single-level list)
     if(!is.list(covar_adjustment[[1]])){

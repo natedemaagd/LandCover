@@ -17,16 +17,14 @@ fullSimulation(
   reg_formula,
   landcover_invasive,
   landcover_susceptible,
-  dep_varname,
   x_coords_varname,
   y_coords_varname,
-  val_adjustment = NULL,
   spread_rate,
   birdcell,
   simlength,
-  simulation_count = 1000,
+  simulation_count = 100,
   dep_var_modifier,
-  covar_adjustment = NULL,
+  covar_adjustment = NA,
   num_cores = parallel::detectCores() - 1
 )
 }
