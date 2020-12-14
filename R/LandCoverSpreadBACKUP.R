@@ -275,36 +275,40 @@ LandCoverSpread <- function(infest_val, suscep_val, spread_rate, birdcell = 0, s
   }
 
 
-  # list of landcover rasters
+
+
+  ##### results #####
+
+
+  # collect results so far
   list_of_lc_rasters      <- summary_list_of_rasters
+  list_of_dep_var_rasters <- c(dep_var_raster_initial, list_of_ETrasters)
 
 
+  # create list of rasters: change in dep_var relative to year 0
+  list_of_dep_var_rasters_change_from_year_0 <- list()
 
-  #### format dep var rasters ----
+    # first raster in list (year 0) should be raster of 0s
+    raster_0s <- dep_var_raster_initial
+    values(raster_0s) <- 0
+    list_of_dep_var_rasters_change_from_year_0[[1]] <- raster_0s
 
-  # create list of dep var rasters, 1 for each year of the simulation
-  list_of_dep_var_rasters <- list(dep_var_raster_initial)[rep(1, simlength)]
+  for(i in 2:(simlength+1)){
 
-  # for rasters year >= 2, set value to NA if landcover changed
-  for(i in 2:length(list_of_lc_rasters)){ values(list_of_dep_var_rasters[[i]])[list_of_lc_rasters[[i]] == infest_val & list_of_lc_rasters[[i-1]] == suscep_val] <- NA }
+    list_of_dep_var_rasters_change_from_year_0[[i]] <- list_of_dep_var_rasters[[i]] - dep_var_raster_initial
 
-  # replace NA values with new predicted values
-  for(i in 2:length(list_of_lc_rasters)){ list_of_dep_var_rasters[[i]] <- cover(list_of_dep_var_rasters[[i]], dep_var_raster_pred) }
+  }
 
-  # create list of changes in dep var (relative to year 1)
-  list_of_dep_var_rasters_change_from_year_0 <- list_of_dep_var_rasters
-  for(i in 1:length(list_of_dep_var_rasters_change_from_year_0)){ list_of_dep_var_rasters_change_from_year_0[[i]] - list_of_dep_var_rasters_change_from_year_0[[1]]}
 
   # raster of cumulative change
   raster_dep_var_cumulative_change <- Reduce('+', list_of_dep_var_rasters_change_from_year_0)
 
 
-
-  #### return final results (with modified dep var if dep_var_modifier == TRUE) ----
-  if(!is.na(dep_var_modifier[[1]])){
+  # return final results (with modified dep var if dep_var_modifier == TRUE)
+  if(!is.na(dep_var_modifier)){
 
     # initiate list of modified depvar rasters (just the original depvar rasters)
-    list_of_dep_var_rasters_modified                    <- list_of_dep_var_rasters  # levels
+    list_of_dep_var_rasters_modified                    <- c(dep_var_raster_initial, list_of_ETrasters)  # levels
     list_of_dep_var_rasters_change_from_year_0_modified <- list_of_dep_var_rasters_change_from_year_0    # changes
 
     # modify them
