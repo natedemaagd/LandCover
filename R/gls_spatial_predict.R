@@ -56,7 +56,7 @@ gls_spatial_predict <- function(data, regression_results, landcover_varname, lan
   newdat <- data
 
   # if an adjustment is specified, the changes have to be made to the input variables
-  if(!is.na(covar_adjustment)){
+  if(!is.na(covar_adjustment[[1]])){
 
     # if only a single value needs to be adjusted (i.e. `covar_adjustment` is a single-level list)
     if(!is.list(covar_adjustment[[1]])){
