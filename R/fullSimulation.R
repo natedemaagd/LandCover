@@ -183,7 +183,7 @@ fullSimulation <- function(data_as_directories = FALSE,
 
   ##### return results
 
-  results_list        <- list(regression_results, predVals, landcover_sim, simPlots, priorityPlots)
+  results_list        <- list(regression_results, predVals, landcover_sim, depvar_sim, simPlots, priorityPlots)
   names(results_list) <- c('gls_spatial', 'gls_spatial_predict', 'LandCoverSpread', 'SimulationPlots', 'PriorityPlots')
 
   return(results_list)
