@@ -3,7 +3,7 @@ library(nlme); library(doParallel); library(foreach); library(parallel); library
 
 # fullSimulation_noShp
 data_as_directories = TRUE
-data = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/dat1.xlsx"
+data = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/Data/dat1.xlsx"
 shp_reg_directory = NULL
 shp_reg_layer = NULL
 shp_app_directory = NULL

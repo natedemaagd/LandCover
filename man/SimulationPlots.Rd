@@ -5,7 +5,8 @@
 \title{Plot figures associated with simulation of landcover spread}
 \usage{
 SimulationPlots(
-  sim_results,
+  landcover_sim_results,
+  depvar_sim_results,
   infest_val,
   suscep_val,
   dep_var_modified = TRUE,
@@ -23,7 +24,9 @@ SimulationPlots(
 )
 }
 \arguments{
-\item{sim_results}{list. The results of the \code{LandCoverSpread} function.}
+\item{landcover_sim_results}{list. The results of the \code{LandCoverSpread} function.}
+
+\item{depvar_sim_results}{list. The results of the \code{ChangeLandcover_to_ChangeDepVar} function.}
 
 \item{infest_val}{numerical. The value of the invasive landcover.}
 

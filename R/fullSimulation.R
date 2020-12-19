@@ -163,14 +163,19 @@ fullSimulation <- function(data_as_directories = FALSE,
                                    dep_var_raster_pred=predVals$`Predicted values raster, post-invasion`,
                                    dep_var_modifier=dep_var_modifier, silent = TRUE)
 
+  # ChangeLandcover_to_ChangeDepVar
+  depvar_sim <- ChangeLandcover_to_ChangeDepVar(landcover_list=landcover_sim$list_of_landcover_rasters, infest_val=landcover_invasive, suscep_val=landcover_susceptible,
+                                                dep_var_raster_initial=predVals$`Predicted values raster, current landcover`, dep_var_raster_pred=predVals$`Predicted values raster, post-invasion`,
+                                                dep_var_modifier=dep_var_modifier)
+
   # SimulationPlots
-  simPlots <- SimulationPlots(sim_results=landcover_sim, infest_val=landcover_invasive, suscep_val=landcover_susceptible,
+  simPlots <- SimulationPlots(landcover_sim_results=landcover_sim, depvar_sim_results=depvar_sim, infest_val=landcover_invasive, suscep_val=landcover_susceptible,
                               font_size = 15, n_grid = 6)
 
   # LandCoverPlot priority maps
-  priorityPlots        <- list(LandCoverPlot(predVals$`Predicted values raster, change`,               value_type = 'priority', decimal_points = 2),
-                               LandCoverPlot(landcover_sim$raster_dep_var_cumulative_change,           value_type = 'priority', decimal_points = 2),
-                               LandCoverPlot(landcover_sim$raster_dep_var_cumulative_change_modified,  value_type = 'priority', decimal_points = 2))
+  priorityPlots        <- list(LandCoverPlot(predVals$`Predicted values raster, change`,    value_type = 'priority', decimal_points = 2),
+                               LandCoverPlot(depvar_sim$depvar_cumulative_change,           value_type = 'priority', decimal_points = 2),
+                               LandCoverPlot(depvar_sim$depvar_cumulative_change_modified,  value_type = 'priority', decimal_points = 2))
   names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
 
 

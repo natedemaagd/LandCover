@@ -4,7 +4,8 @@
 #'
 #' @import sp tidyr rgdal raster ggplot2 viridis ggpubr
 #'
-#' @param sim_results list. The results of the `LandCoverSpread` function.
+#' @param landcover_sim_results list. The results of the `LandCoverSpread` function.
+#' @param depvar_sim_results list. The results of the `ChangeLandcover_to_ChangeDepVar` function.
 #' @param infest_val numerical. The value of the invasive landcover.
 #' @param suscep_val numerical. Vector of landcover values that are susceptible to the spread.
 #' @param dep_var_modified logical. If `TRUE`, creates line graphs with added modified dependent variable from the simulation. Requires `dep_var_modifier` to be specified in `LandCoverSpread`.
@@ -54,7 +55,7 @@
 
 ### FUNCTION:
 
-SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modified = TRUE,
+SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_val, suscep_val, dep_var_modified = TRUE,
                             dep_var_label = 'dep_var',
                             dep_var_modified_label = 'dep_var_modified',
                             font_size = 15, line_thickness = 0.8,
@@ -74,10 +75,10 @@ SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modifie
   lc_plot_timelapse <- list()
 
   # fill list
-  for(i in 1:length(sim_results$list_of_landcover_rasters)){
+  for(i in 1:length(landcover_sim_results$list_of_landcover_rasters)){
 
     # create data.frame from raster
-    df <- as.data.frame(sim_results$list_of_landcover_rasters[[i]], xy = TRUE)
+    df <- as.data.frame(landcover_sim_results$list_of_landcover_rasters[[i]], xy = TRUE)
 
 
     # convert to invasive or non-invasive, then remove cells that are NA
@@ -109,7 +110,7 @@ SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modifie
   ##### create list of dep_var plots over time #####
 
   # get range of values for limits of color scale
-  color_limits <- range(c(sapply(sim_results$list_of_dep_var_rasters_change_from_year_0, function(r){range(values(r))})), na.rm = TRUE)
+  color_limits <- range(c(sapply(depvar_sim_results$depvar_list_change_from_year_0, function(r){range(values(r))})), na.rm = TRUE)
 
   # set color scale according to whether the colors are flipped
   if(isFALSE(flip_colors)){
@@ -131,10 +132,10 @@ SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modifie
   df_list                <- list()
 
   # fill list
-  for(i in 1:length(sim_results$list_of_dep_var_rasters_change_from_year_0)){
+  for(i in 1:length(depvar_sim_results$depvar_list_change_from_year_0)){
 
     # create data.frame from raster
-    df_list[[i]] <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0[[i]], xy = TRUE)
+    df_list[[i]] <- as.data.frame(depvar_sim_results$depvar_list_change_from_year_0[[i]], xy = TRUE)
 
     # create breaks and labels for the plots, while checking to see if any change in dependent variable
     legend_breaks = c(min(color_limits), mean(color_limits), max(color_limits))
@@ -172,7 +173,7 @@ SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modifie
   if(isTRUE(dep_var_modified)){
 
     # get range of values for limits of color scale
-    color_limits <- range(c(sapply(sim_results$list_of_dep_var_rasters_change_from_year_0_modified, function(r){range(values(r))})), na.rm = TRUE)
+    color_limits <- range(c(sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){range(values(r))})), na.rm = TRUE)
 
     # set color scale according to whether the colors are flipped
     if(isFALSE(flip_colors)){
@@ -194,10 +195,10 @@ SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modifie
     df_list                         <- list()
 
     # fill list
-    for(i in 1:length(sim_results$list_of_dep_var_rasters_change_from_year_0_modified)){
+    for(i in 1:length(depvar_sim_results$depvar_list_change_from_year_0_modified)){
 
       # create data.frame from raster
-      df_list[[i]] <- as.data.frame(sim_results$list_of_dep_var_rasters_change_from_year_0_modified[[i]], xy = TRUE)
+      df_list[[i]] <- as.data.frame(depvar_sim_results$depvar_list_change_from_year_0_modified[[i]], xy = TRUE)
 
       # create breaks and labels for the plots, while checking to see if any change in dependent variable
       legend_breaks = c(min(color_limits), mean(color_limits), max(color_limits))
@@ -238,9 +239,9 @@ SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modifie
   if(isTRUE(dep_var_modified)){
 
     # get data
-    LineGraphData <- data.frame(Year             = 0:(length(sim_results$list_of_landcover_rasters)-1                                                   ),
-                                dep_var          = sapply(sim_results$list_of_dep_var_rasters_change_from_year_0,          function(r){ sum(values(r)) }),
-                                dep_var_modified = sapply(sim_results$list_of_dep_var_rasters_change_from_year_0_modified, function(r){ sum(values(r)) }))
+    LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1                                                   ),
+                                dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r)) }),
+                                dep_var_modified = sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){ sum(values(r)) }))
 
 
     # melt data
@@ -266,8 +267,8 @@ SimulationPlots <- function(sim_results, infest_val, suscep_val, dep_var_modifie
     if(is.na(line_colors)){ line_colors = viridis(2)} else { line_colors = line_colors}
 
     # get data
-    LineGraphData <- data.frame(Year             = 0:(length(sim_results$list_of_landcover_rasters)-1                                                   ),
-                                dep_var          = sapply(sim_results$list_of_dep_var_rasters_change_from_year_0,          function(r){ sum(values(r)) }))
+    LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1                                                   ),
+                                dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r)) }))
 
 
     # plot
