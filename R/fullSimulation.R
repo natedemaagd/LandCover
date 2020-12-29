@@ -80,6 +80,10 @@ fullSimulation <- function(data_as_directories = FALSE,
 
   }
 
+  # if a shapefile is missing, set its loaded version as NA
+  if(is.null(shp_app_layer)){shp_app <- NULL}
+  if(is.null(shp_reg_layer)){shp_reg <- NULL}
+
   # datSubset
   dat_sample=dat_sample
 
@@ -112,9 +116,6 @@ fullSimulation <- function(data_as_directories = FALSE,
 
   ### dat subset - subset if specified, and then only if requested sample size is less than the number of pixels in `shp_reg`
 
-  # if regression shapefile NOT provided and application shapefile provided, return error
-  if(is.null(shp_reg_layer) & !is.null(shp_app_layer)){return('Error: If you provide `shp_app_layer`, you must also provide `shp_reg_layer`! If you have only one shapefile, set it to `shp_reg`.')}
-
   # if regression shapefile provided and sample size provided, sample data
   if(!is.null(shp_reg_layer) & !is.null(dat_sample)){
     if(nrow(shp_reg_layer) >  dat_sample){ data_subset <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
@@ -124,15 +125,43 @@ fullSimulation <- function(data_as_directories = FALSE,
 
   # if regression shapefile provided and sample size NOT provided, sample data
   if(!is.null(shp_reg_layer) & is.null(dat_sample)){
-                                           data_subset <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
-                                           data_subset <- data_subset$RegressionData
+                                           data_regression <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
+                                           data_regression <- data_regression$RegressionData
   }
 
-  # if no shapefiles are provided, sample only using samepl size, if it's provided
+  # if landcover application shapefile provided, subset data
+  if(!is.null(shp_app_layer)){
+
+    if(is.null(shp_reg)){
+      data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_app, shp_app=shp_app, sample=dat_sample)
+      data_app <- data_app$SimulationData
+    }
+
+    if(!is.null(shp_reg)){
+      data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
+      data_app <- data_app$SimulationData
+    }
+
+  }
+
+  # if no shapefiles are provided, sample only using sample size, if it's provided
   if(is.null(shp_reg_layer) & is.null(shp_app_layer)){
 
-    data <- data
+    data_regression <- data
+    data_app        <- data
 
+    if(!is.null(dat_sample) & dat_sample < nrow(data_regression)){
+      data_regression <- data_regression[sample(nrow(data_regression), dat_sample),]
+    }
+
+  }
+
+  # if one or the other shapefiles aren't provided...
+  if( is.null(shp_reg_layer) & !is.null(shp_app_layer)){
+    data_regression <- data_app
+  }
+  if(!is.null(shp_reg_layer) &  is.null(shp_app_layer)){
+    data_app <- data_regression
   }
 
 
@@ -140,24 +169,25 @@ fullSimulation <- function(data_as_directories = FALSE,
 
   # convert all data from tibbles to data.frames
   data <- as.data.frame(data)
-  if(exists('data_subset')){ data_subset <- as.data.frame(data_subset) }
+  data_regression <- as.data.frame(data_regression)
+  data_app <- as.data.frame(data_app)
 
   # convert landcover codes to character
   data[,landcover_varname] <- as.character(data[,landcover_varname])
-  if(exists('data_subset')){ data_subset[,landcover_varname] <- as.character(data_subset[,landcover_varname]) }
+  data_regression[,landcover_varname] <- as.character(data_regression[,landcover_varname])
+  data_app[,landcover_varname] <- as.character(data_app[,landcover_varname])
   landcover_invasive    <- as.character(landcover_invasive)
   landcover_susceptible <- as.character(landcover_susceptible)
 
   # gls_spatial
-  if(exists('data_subset')){ data = data_subset}  # if data were subsetted, use that for the regression
-  regression_results <- gls_spatial(data=data, landcover_varname=landcover_varname, landcover_vec=landcover_vec, reg_formula=reg_formula, error_formula=error_formula, num_cores=num_cores, silent = TRUE)
+  regression_results <- gls_spatial(data=data_regression, landcover_varname=landcover_varname, landcover_vec=landcover_vec, reg_formula=reg_formula, error_formula=error_formula, num_cores=num_cores, silent = TRUE)
 
   # gls_spatial_predict
-  predVals <- gls_spatial_predict(data=data, regression_results=regression_results, landcover_varname=landcover_varname, landcover_invasive=landcover_invasive, landcover_susceptible=landcover_susceptible,
+  predVals <- gls_spatial_predict(data=data_app, regression_results=regression_results, landcover_varname=landcover_varname, landcover_invasive=landcover_invasive, landcover_susceptible=landcover_susceptible,
                                   dep_varname=dep_varname, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, covar_adjustment=covar_adjustment)
 
   # LandCoverSpread
-  lc_raster <- raster::rasterFromXYZ(data[c('x', 'y', landcover_varname)])  # convert landcover to raster
+  lc_raster <- raster::rasterFromXYZ(data_app[c('x', 'y', landcover_varname)])  # convert landcover to raster
   landcover_sim <- LandCoverSpread(infest_val=landcover_invasive, suscep_val=landcover_susceptible, spread_rate=spread_rate, birdcell=birdcell, simlength=simlength, simulation_count=simulation_count,
                                    lc_raster=lc_raster, dep_var_raster_initial=predVals$`Predicted values raster, current landcover`,
                                    dep_var_raster_pred=predVals$`Predicted values raster, post-invasion`,
@@ -178,13 +208,51 @@ fullSimulation <- function(data_as_directories = FALSE,
                                LandCoverPlot(depvar_sim$depvar_cumulative_change_modified,  value_type = 'priority', decimal_points = 2))
   names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
 
+  # plot original landcover and shapefile(s)
+
+    # first create new data - full region with landcover type (susceptible, invasive, or other)
+    data_lctypes <- data
+    data_lctypes$`Landcover type` <- ifelse(data_lctypes[,landcover_varname] == landcover_invasive, 'Invasive', ifelse(data_lctypes[,landcover_varname] %in% landcover_susceptible, 'Susceptible', 'Other'))
+
+  if(is.null(shp_reg) & is.null(shp_app)){
+    landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
+      theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
+            text = element_text(size = 15)) +
+      scale_fill_viridis_d()
+  }
+  if(!is.null(shp_reg) & is.null(shp_app)){
+    landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
+      theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
+            text = element_text(size = 15)) +
+      scale_fill_viridis_d() +
+      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent') +
+      labs(caption = 'Red line is regression/simulation region')
+  }
+  if(is.null(shp_reg) & !is.null(shp_app)){
+      landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
+      theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
+            text = element_text(size = 15)) +
+      scale_fill_viridis_d() +
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'red',  fill = 'transparent') +
+      labs(caption = 'Red line is regression/simulation region')
+    }
+  if(!is.null(shp_reg) & !is.null(shp_app)){
+    landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
+      theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
+            text = element_text(size = 15)) +
+      scale_fill_viridis_d() +
+      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent') +
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'blue', fill = 'transparent') +
+      labs(caption = 'Red line is regression region, blue region is simulation region')
+  }
+
 
 
 
   ##### return results
 
-  results_list        <- list(regression_results, predVals, landcover_sim, depvar_sim, simPlots, priorityPlots)
-  names(results_list) <- c('gls_spatial', 'gls_spatial_predict', 'LandCoverSpread', 'SimulationPlots', 'PriorityPlots')
+  results_list        <- list(landcover_shp_plot, regression_results, predVals, landcover_sim, depvar_sim, simPlots, priorityPlots)
+  names(results_list) <- c('preview_plot', 'gls_spatial', 'gls_spatial_predict', 'LandCoverSpread', 'DepvarSpread', 'SimulationPlots', 'PriorityPlots')
 
   return(results_list)
 

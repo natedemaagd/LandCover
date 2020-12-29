@@ -1,4 +1,4 @@
-library(nlme); library(doParallel); library(foreach); library(parallel); library(viridis); library(rgdal); library(sp); library(readxl); library(LandCover)
+library(nlme); library(doParallel); library(foreach); library(parallel); library(viridis); library(rgdal); library(sp); library(readxl); library(LandCover); library(ggplot2)
 
 
 # fullSimulation_noShp
@@ -28,9 +28,9 @@ num_cores = 5
 
 # fullSimulation_Shp
 data_as_directories = TRUE
-data = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/Data/dat1.xlsx"
-shp_reg_directory = 'D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/Data/shp1-LargeRegion'
-shp_reg_layer = 'shp1-LargeRegion'
+data = "D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/Data/dat2.xlsx"
+#shp_reg_directory = 'D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/Data/shp1-LargeRegion'
+#shp_reg_layer = 'shp1-LargeRegion'
 shp_app_directory = 'D:/OneDrive - hawaii.edu/Documents/Projects/Packages/LandCover/Examples/Data/shp2-SmallRegion'
 shp_app_layer = 'shp2-SmallRegion'
 convertFromUTM = FALSE

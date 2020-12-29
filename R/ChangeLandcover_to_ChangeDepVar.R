@@ -30,11 +30,11 @@ ChangeLandcover_to_ChangeDepVar <- function(landcover_list, infest_val, suscep_v
   # initiate list - one raster for each year
   depvar_list <- list(dep_var_raster_initial)[rep(1,length(landcover_list))]
 
-  # for each year i, adjust depvar value if landcover changes from suscep to infest
+  # for each year i, adjust depvar value if landcover changes from suscep to infest relative to first year
   for(i in 2:length(landcover_list)){
 
     # change value to NA if the cell is invaded
-    depvar_list[[i]][landcover_list[[i]] == as.numeric(infest_val) & landcover_list[[i-1]] %in% as.numeric(suscep_val)] <- NA
+    depvar_list[[i]][landcover_list[[i]] == as.numeric(infest_val) & landcover_list[[1]] %in% as.numeric(suscep_val)] <- NA
 
     # fill all NAs with the predicted new dep var value
     depvar_list[[i]] <- cover(depvar_list[[i]], dep_var_raster_pred)
