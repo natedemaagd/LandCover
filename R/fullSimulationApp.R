@@ -8,9 +8,9 @@
 #' @param data_as_directories logical. `TRUE` if data and shapefiles must be loaded from files. `FALSE` if data and shapefiles are `R` objects already loaded in the environment.
 #' @param data `data.frame` if data is in environement, or character string specifying location of xlsx data with directory if `data_as_directories = TRUE`
 #' @param shp_reg_directory character string specifying directory of shapefile outlining the area of `data` to be used for the regression. `NULL` if `data_as_directories = FALSE`
-#' @param shp_reg_layer character string specifying layer (.shp) filename corresponding to `shp_reg_directory`, or spatial polygon object if `data_as_directories = FALSE`
+#' @param shp_reg character string specifying layer (.shp) filename corresponding to `shp_reg_directory`, or spatial polygon object if `data_as_directories = FALSE`
 #' @param shp_app_directory character string specifying directory of shapefile outlining the area of `data` to which the final simulation will be applied, if different from `shp_reg`.  `NULL` if `data_as_directories = FALSE`
-#' @param shp_app_layer character string specifying layer (.shp) filename corresponding to `shp_app_directory`, or spatial polygon object if `data_as_directories = FALSE`
+#' @param shp_app character string specifying layer (.shp) filename corresponding to `shp_app_directory`, or spatial polygon object if `data_as_directories = FALSE`
 #' @param convertFromUTM logical. Set to `TRUE` if you are subsetting your data with shapefile(s) and your shapefile(s) are in UTM coordinates instead of lon/lat.
 #' @param dat_sample numerical. If specified, will take a sample of `n` observations for the regression (suggested if `shp_reg` has lots of observations)
 #' @param landcover_varname character string specifying the landcover variable from `data`
@@ -24,6 +24,7 @@
 #' @param simlength integer. Number of years the simulation should run.
 #' @param simulation_count integer. Length of simulation bootstrap.
 #' @param dep_var_modifier numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)
+#' @param unit_converter numerical. A scalar to optionally modify the values of the resulting dependent variable (and modified dependent variable, if present) to convert units (e.g. mm/yr to gal/acre/day). Default value is `1`.
 #' @param covar_adjustment list. List specifying change in covariate values. See ?gls_spatial_predict.
 #' @param num_cores numerical. Number of cores for parallel processing, max 5
 #'
@@ -38,12 +39,9 @@
 
 
 ### FUNCTION:
-fullSimulation <- function(data_as_directories = FALSE,
-                           data,
-                           shp_reg_directory = NULL,
-                           shp_reg_layer = NULL,
-                           shp_app_directory = NULL,
-                           shp_app_layer = NULL,
+fullSimulationApp <- function(data,
+                           shp_reg = NULL,
+                           shp_app = NULL,
                            convertFromUTM = FALSE,
                            dat_sample = NULL,
                            landcover_varname,
@@ -56,7 +54,8 @@ fullSimulation <- function(data_as_directories = FALSE,
                            birdcell,
                            simlength,
                            simulation_count = 100,
-                           dep_var_modifier,
+                           dep_var_modifier = NA,
+                           unit_converter = 1,
                            covar_adjustment = NA,
                            num_cores = parallel::detectCores() - 1){
 
@@ -65,24 +64,9 @@ fullSimulation <- function(data_as_directories = FALSE,
 
   ##### define variables
 
-  # if data are directories, load from directories. Otherwise, load from environment
-  if(data_as_directories){
-
-    data = readxl::read_xlsx(data)
-    if(exists('shp_reg_directory')){ if(!is.null(shp_reg_directory)){ shp_reg = readOGR(dsn = shp_reg_directory, layer = shp_reg_layer) }}
-    if(exists('shp_app_directory')){ if(!is.null(shp_app_directory)){ shp_app = readOGR(dsn = shp_app_directory, layer = shp_app_layer) }}
-
-  } else {
-
-    data=data
-    shp_reg=shp_reg_layer
-    shp_app=shp_app_layer
-
-  }
-
   # if a shapefile is missing, set its loaded version as NA
-  if(is.null(shp_app_layer)){shp_app <- NULL}
-  if(is.null(shp_reg_layer)){shp_reg <- NULL}
+  if(is.null(shp_app)){shp_app <- NULL}
+  if(is.null(shp_reg)){shp_reg <- NULL}
 
   # datSubset
   dat_sample=dat_sample
@@ -117,50 +101,39 @@ fullSimulation <- function(data_as_directories = FALSE,
   ### dat subset - subset if specified, and then only if requested sample size is less than the number of pixels in `shp_reg`
 
   # if regression shapefile provided, sample data
-  if(!is.null(shp_reg_layer)){
+  if(!is.null(shp_reg)){
 
     data_regression <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
     data_regression <- data_regression$RegressionData
   }
 
   # if landcover application shapefile provided, subset data
-  if(!is.null(shp_app_layer)){
+  if(!is.null(shp_app)){
 
-    if(is.null(shp_reg)){
-      data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_app, shp_app=shp_app, sample=dat_sample)
-      data_app <- data_app$SimulationData
-    }
-
-    if(!is.null(shp_reg)){
-      data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
-      data_regression <- data_app$RegressionData
-      data_app        <- data_app$SimulationData
-    }
+    data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
+    data_app <- data_app$SimulationData
 
   }
 
   # if no shapefiles are provided, sample only using sample size, if it's provided
-  if(is.null(shp_reg_layer) & is.null(shp_app_layer)){
+  if(is.null(shp_reg) & is.null(shp_app)){
 
     data_regression <- data
     data_app        <- data
 
-    if(!is.null(dat_sample) & dat_sample < nrow(data_regression)){
+    if(!is.null(dat_sample) & isTRUE(dat_sample < nrow(data_regression))){
       data_regression <- data_regression[sample(nrow(data_regression), dat_sample),]
     }
 
   }
 
   # if one or the other shapefiles aren't provided...
-  if( is.null(shp_reg_layer) & !is.null(shp_app_layer)){
-    data_regression <- data_app
+  if( is.null(shp_reg) & !is.null(shp_app)){
+    data_regression <- data
   }
-  if(!is.null(shp_reg_layer) &  is.null(shp_app_layer)){
-    shp_app  <- shp_reg
+  if(!is.null(shp_reg) &  is.null(shp_app)){
     data_app <- data_regression
   }
-
-
 
 
   # convert all data from tibbles to data.frames
@@ -181,6 +154,14 @@ fullSimulation <- function(data_as_directories = FALSE,
   # gls_spatial_predict
   predVals <- gls_spatial_predict(data=data_app, regression_results=regression_results, landcover_varname=landcover_varname, landcover_invasive=landcover_invasive, landcover_susceptible=landcover_susceptible,
                                   dep_varname=dep_varname, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, covar_adjustment=covar_adjustment)
+
+  # UNIT CONVERSION: change units of values, if specified
+  predVals$`Predicted values, current landcover`        <- predVals$`Predicted values, current landcover`        * unit_converter
+  predVals$`Predicted values, post-invasion`            <- predVals$`Predicted values, post-invasion`            * unit_converter
+  predVals$`Predicted values, change`                   <- predVals$`Predicted values, change`                   * unit_converter
+  predVals$`Predicted values raster, current landcover` <- predVals$`Predicted values raster, current landcover` * unit_converter
+  predVals$`Predicted values raster, post-invasion`     <- predVals$`Predicted values raster, post-invasion`     * unit_converter
+  predVals$`Predicted values raster, change`            <- predVals$`Predicted values raster, change`            * unit_converter
 
   # LandCoverSpread
   lc_raster <- raster::rasterFromXYZ(data_app[c('x', 'y', landcover_varname)])  # convert landcover to raster
@@ -210,21 +191,38 @@ fullSimulation <- function(data_as_directories = FALSE,
     data_lctypes <- data
     data_lctypes$`Landcover type` <- ifelse(data_lctypes[,landcover_varname] == landcover_invasive, 'Invasive', ifelse(data_lctypes[,landcover_varname] %in% landcover_susceptible, 'Susceptible', 'Other'))
 
+  # both shapefiles missing
   if(is.null(shp_reg) & is.null(shp_app)){
     landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
       scale_fill_viridis_d()
   }
+  # both shapfiles given
   if(!is.null(shp_reg) & !is.null(shp_app)){
     landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
       scale_fill_viridis_d() +
       geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent') +
-      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'blue', fill = 'transparent') +
-      labs(caption = 'Red line is regression region, blue region is simulation region')
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'blue', fill = 'transparent')
   }
+  # shp_reg only
+  if(!is.null(shp_reg) & is.null(shp_app)){
+    landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
+      theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
+            text = element_text(size = 15)) +
+      scale_fill_viridis_d() +
+      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent')
+  }
+  # shp_app only
+  if(is.null(shp_reg) & !is.null(shp_app)){
+    landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
+      theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
+            text = element_text(size = 15)) +
+      scale_fill_viridis_d() +
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'blue', fill = 'transparent')
+    }
 
 
 

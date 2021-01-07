@@ -8,7 +8,7 @@ datSubset(
   data,
   x_coords_varname,
   y_coords_varname,
-  shp_reg,
+  shp_reg = NULL,
   shp_app = NULL,
   sample = NULL,
   convertFromUTM = FALSE
