@@ -100,9 +100,11 @@ fullSimulationApp <- function(data,
 
   ### dat subset - subset if specified, and then only if requested sample size is less than the number of pixels in `shp_reg`
 
+  data <- as.data.frame(data)   # if data gets converted to tibble from subsetting, return to data.frame
+
   # if regression shapefile provided, sample data
   if(!is.null(shp_reg)){
-
+    data_regression <- data[data[,landcover_varname] %in% landcover_vec,]
     data_regression <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
     data_regression <- data_regression$RegressionData
   }
@@ -118,7 +120,7 @@ fullSimulationApp <- function(data,
   # if no shapefiles are provided, sample only using sample size, if it's provided
   if(is.null(shp_reg) & is.null(shp_app)){
 
-    data_regression <- data
+    data_regression <- data[data[,landcover_varname] %in% landcover_vec,]
     data_app        <- data
 
     if(!is.null(dat_sample) & isTRUE(dat_sample < nrow(data_regression))){
@@ -130,9 +132,15 @@ fullSimulationApp <- function(data,
   # if one or the other shapefiles aren't provided...
   if( is.null(shp_reg) & !is.null(shp_app)){
     data_regression <- data
+
+    # subset data if it's provided
+    if(!is.null(dat_sample) & isTRUE(dat_sample < nrow(data_regression))){
+      data_regression <- data_regression[sample(nrow(data_regression), dat_sample),]
+    }
   }
+
   if(!is.null(shp_reg) &  is.null(shp_app)){
-    data_app <- data_regression
+    data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=NULL, sample=dat_sample)
   }
 
 
@@ -163,8 +171,12 @@ fullSimulationApp <- function(data,
   predVals$`Predicted values raster, post-invasion`     <- predVals$`Predicted values raster, post-invasion`     * unit_converter
   predVals$`Predicted values raster, change`            <- predVals$`Predicted values raster, change`            * unit_converter
 
-  # LandCoverSpread
-  lc_raster <- raster::rasterFromXYZ(data_app[c('x', 'y', landcover_varname)])  # convert landcover to raster
+  # LandCoverSpread - first create landcover raster from application data, then use it to run the simulation
+  e         <- raster::extent(as.matrix(data_app[c(x_coords_varname, y_coords_varname)]))  # create extent to match data_app
+  r         <- raster::raster(e, ncol = nrow(unique(data_app[x_coords_varname])), nrow = nrow(unique(data_app[y_coords_varname])))  # create raster for data_app
+  lc_raster <- raster::rasterize(as.matrix(data_app[c(x_coords_varname, y_coords_varname)]), r, as.numeric(data_app[,landcover_varname]))  # rasterize data_app using e and r
+  lc_raster <- setExtent(lc_raster, predVals$`Predicted values raster, current landcover`)  # rescale the new raster to match the extent of original data
+
   landcover_sim <- LandCoverSpread(infest_val=landcover_invasive, suscep_val=landcover_susceptible, spread_rate=spread_rate, birdcell=birdcell, simlength=simlength, simulation_count=simulation_count,
                                    lc_raster=lc_raster, dep_var_raster_initial=predVals$`Predicted values raster, current landcover`,
                                    dep_var_raster_pred=predVals$`Predicted values raster, post-invasion`,
@@ -180,9 +192,9 @@ fullSimulationApp <- function(data,
                               font_size = 15, n_grid = 6)
 
   # LandCoverPlot priority maps
-  priorityPlots        <- list(LandCoverPlot(predVals$`Predicted values raster, change`,    value_type = 'priority', decimal_points = 2),
-                               LandCoverPlot(depvar_sim$depvar_cumulative_change,           value_type = 'priority', decimal_points = 2),
-                               LandCoverPlot(depvar_sim$depvar_cumulative_change_modified,  value_type = 'priority', decimal_points = 2))
+  priorityPlots        <- list(LandCoverPlot(raster = predVals$`Predicted values raster, change`,    value_type = 'priority', decimal_points = 2),
+                               LandCoverPlot(raster = depvar_sim$depvar_cumulative_change,           value_type = 'priority', decimal_points = 2),
+                               LandCoverPlot(raster = depvar_sim$depvar_cumulative_change_modified,  value_type = 'priority', decimal_points = 2))
   names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
 
   # plot original landcover and shapefile(s)

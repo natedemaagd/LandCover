@@ -110,7 +110,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
   ##### create list of dep_var plots over time #####
 
   # get range of values for limits of color scale
-  color_limits <- range(c(sapply(depvar_sim_results$depvar_list_change_from_year_0, function(r){range(values(r))})), na.rm = TRUE)
+  color_limits <- range(c(sapply(depvar_sim_results$depvar_list_change_from_year_0, function(ras){range(values(ras), na.rm = TRUE)})), na.rm = TRUE)
 
   # set color scale according to whether the colors are flipped
   if(isFALSE(flip_colors)){
@@ -153,7 +153,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
       geom_raster(aes(x, y, fill = layer)) +
 
       scale_fill_gradient2(name = dep_var_label, low = fill_low, mid = fill_mid, high = fill_high,
-                           limits = range(legend_breaks),
+                           limits = range(legend_breaks, na.rm = TRUE),
                            breaks = legend_breaks,
                            labels = ) +
 
@@ -173,7 +173,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
   if(isTRUE(dep_var_modified)){
 
     # get range of values for limits of color scale
-    color_limits <- range(c(sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){range(values(r))})), na.rm = TRUE)
+    color_limits <- range(c(sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(ras){range(values(ras), na.rm = TRUE)})), na.rm = TRUE)
 
     # set color scale according to whether the colors are flipped
     if(isFALSE(flip_colors)){
@@ -215,7 +215,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
         geom_raster(aes(x, y, fill = layer)) +
 
         scale_fill_gradient2(name = dep_var_modified_label, low = fill_low, mid = fill_mid, high = fill_high,
-                             limits = range(legend_breaks),
+                             limits = range(legend_breaks, na.rm = TRUE),
                              breaks = legend_breaks,
                              labels = legend_labels) +
 
@@ -240,8 +240,8 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
     # get data
     LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1                                                   ),
-                                dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r)) }),
-                                dep_var_modified = sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){ sum(values(r)) }))
+                                dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r), na.rm = TRUE) }),
+                                dep_var_modified = sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){ sum(values(r), na.rm = TRUE) }))
 
 
     # melt data
@@ -268,7 +268,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
     # get data
     LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1                                                   ),
-                                dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r)) }))
+                                dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r), na.rm = TRUE) }))
 
 
     # plot

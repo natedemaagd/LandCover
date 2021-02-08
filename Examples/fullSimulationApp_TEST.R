@@ -20,6 +20,7 @@ fullSim <- fullSimulationApp(data = data,
                              simlength             = 15,
                              simulation_count      = 100,
                              dep_var_modifier      = 0.80,
+                             unit_converter = 100,
                              dat_sample = 5000,
                              covar_adjustment = list('temp', 0))   # changes all `temp` values to 0 for pixels that are invaded
 

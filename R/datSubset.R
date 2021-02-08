@@ -43,7 +43,7 @@ datSubset <- function(data, x_coords_varname, y_coords_varname, shp_reg = NULL, 
   if(!is.null(shp_app)){ datSpApp <- datSp[shp_app,]} else { datSpApp <- datSpReg }
 
   # if `sample` is specified, sample the regression data iff data has more obs than the requested sample size
-  if(!is.null(sample) & isTRUE(nrow(data) > sample)) datSpReg <- datSpReg[sample(nrow(datSpReg), sample),]
+  if(!is.null(sample) & isTRUE(nrow(datSpReg) > sample)) datSpReg <- datSpReg[sample(nrow(datSpReg), sample),]
 
   # return results
   results <- list(datSpReg, datSpApp)

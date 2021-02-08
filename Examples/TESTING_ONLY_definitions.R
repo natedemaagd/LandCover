@@ -1,4 +1,4 @@
-library(nlme); library(doParallel); library(foreach); library(parallel); library(viridis); library(rgdal); library(sp); library(readxl); library(LandCover); library(ggplot2)
+library(nlme); library(doParallel); library(foreach); library(parallel); library(viridis); library(rgdal); library(sp); library(readxl); library(LandCover); library(ggplot2); library(raster)
 
 
 # fullSimulation_noShp
@@ -47,6 +47,7 @@ simlength             = 15
 simulation_count      = 100
 dep_var_modifier      = 0.80
 covar_adjustment = list('temp', 0)
+unit_converter = 100
 num_cores = 5
 
 
@@ -69,4 +70,5 @@ simulation_count      = 100
 dep_var_modifier      = 0.80
 dat_sample = 5000
 covar_adjustment = list('temp', 0)
+unit_converter = 100
 num_cores = 5

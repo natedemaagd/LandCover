@@ -84,14 +84,14 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
   if(value_type == 'continuous' & isTRUE(break_at_zero)){
 
     main_plot <- main_plot + geom_raster(aes(fill = value)) + scale_fill_gradient2(low = continuous_break0_low, high = continuous_break0_high, mid = continuous_break0_mid,
-                                                                                   limits = c(min(values(raster)),
-                                                                                              max(values(raster))),
-                                                                                   breaks = c(min(values(raster)),
-                                                                                              (min(values(raster)) + max(values(raster)))/2,
-                                                                                              max(values(raster))),
-                                                                                   labels = format(round(c(min(values(raster)),
-                                                                                                           (min(values(raster)) + max(values(raster)))/2,
-                                                                                                           max(values(raster))),
+                                                                                   limits = c(min(values(raster), na.rm = TRUE),
+                                                                                              max(values(raster), na.rm = TRUE)),
+                                                                                   breaks = c(min(values(raster), na.rm = TRUE),
+                                                                                              (min(values(raster), na.rm = TRUE) + max(values(raster), na.rm = TRUE))/2,
+                                                                                              max(values(raster), na.rm = TRUE)),
+                                                                                   labels = format(round(c(min(values(raster), na.rm = TRUE),
+                                                                                                           (min(values(raster, na.rm = TRUE)) + max(values(raster), na.rm = TRUE))/2,
+                                                                                                           max(values(raster), na.rm = TRUE)),
                                                                                                          digits = decimal_points),
                                                                                                    nsmall = decimal_points))
 
@@ -101,14 +101,14 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
   if(value_type == 'continuous' & isFALSE(break_at_zero)){
 
     main_plot <- main_plot + geom_raster(aes(fill = value)) + scale_fill_continuous(type = continuous_type,
-                                                                                    limits = c(min(values(raster)),
-                                                                                               max(values(raster))),
-                                                                                    breaks = c(min(values(raster)),
-                                                                                               (min(values(raster)) + max(values(raster)))/2,
-                                                                                               max(values(raster))),
-                                                                                    labels = format(round(c(min(values(raster)),
-                                                                                                            (min(values(raster)) + max(values(raster)))/2,
-                                                                                                            max(values(raster))),
+                                                                                    limits = c(min(values(raster), na.rm = TRUE),
+                                                                                               max(values(raster), na.rm = TRUE)),
+                                                                                    breaks = c(min(values(raster), na.rm = TRUE),
+                                                                                               (min(values(raster), na.rm = TRUE) + max(values(raster), na.rm = TRUE))/2,
+                                                                                               max(values(raster), na.rm = TRUE)),
+                                                                                    labels = format(round(c(min(values(raster), na.rm = TRUE),
+                                                                                                            (min(values(raster), na.rm = TRUE) + max(values(raster), na.rm = TRUE))/2,
+                                                                                                            max(values(raster), na.rm = TRUE)),
                                                                                                           digits = decimal_points),
                                                                                                     nsmall = decimal_points))
 
@@ -136,17 +136,20 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
 
     # get all values of the raster
-    raster_val = values(raster)[values(raster) != 0]
-
+    raster_val = values(raster)
 
     # get breaks based on specified number of priority categories
-    raster_val_breaks = quantile(raster_val, probs = seq(0, 1, length.out = priority_categories + 1), na.rm = TRUE)
+    raster_val_breaks = quantile(raster_val[raster_val != 0 & !is.na(raster_val)], probs = seq(0, 1, length.out = priority_categories + 1), na.rm = TRUE)
 
+    # replace raster_val with interval from rater_val_breaks
+    raster_val_interval <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
 
     # create new raster with the priority values rather than continuous values
     raster2 <- raster
-    values(raster2)[values(raster2) != 0] <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
+    values(raster2) <- raster_val_interval
 
+    # replace values of 0 in case one category includes values above and below 0
+    raster2[raster == 0] <- 0
 
     # create labels based on priority category cutoffs
     legend_labels <- list()
@@ -177,7 +180,7 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
         geom_raster(aes(fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
-        scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])))
+        scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])), na.translate = FALSE)
 
     } else {
 
@@ -185,7 +188,7 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
         geom_raster(aes(fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
-        scale_fill_manual(labels = legend_labels, values = priority_colors)
+        scale_fill_manual(labels = legend_labels, values = priority_colors, na.translate = FALSE)
 
     }
 
