@@ -1,4 +1,4 @@
-library(nlme); library(doParallel); library(foreach); library(parallel); library(viridis); library(rgdal); library(sp); library(readxl); library(LandCover); library(ggplot2); library(raster)
+library(nlme); library(doParallel); library(foreach); library(parallel); library(viridis); library(rgdal); library(sp); library(readxl); library(LandCover); library(ggplot2); library(raster); library(rasterVis)
 
 
 # fullSimulation_noShp
