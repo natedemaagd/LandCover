@@ -115,16 +115,27 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
   AIC_min <- sapply(AICs, which.min)
 
   # get final list of regression results, one for each landcover, corresponding to the model with lowest AIC
+    # if regression has too few data points, it will return an error. If there is an error, return NA for that regression
   reg_results_final <- list()
-  for(i in 1:length(reg_results)){ reg_results_final[[i]] <- reg_results[[i]][[AIC_min[[i]]]]}
+  for(i in 1:length(reg_results)){ reg_results_final[[i]] <- try(reg_results[[i]][[AIC_min[[i]]]], silent = TRUE)}
+  for(i in 1:length(reg_results)){ reg_results_final[[i]] <- if(class(reg_results_final[[i]]) == 'try-error'){ reg_results_final[[i]] <- NA} else {reg_results_final[[i]] <- reg_results_final[[i]]} }
 
   # rename elements of `reg_results_final` to match the landcover codes
   names(reg_results_final) <- landcover_vec
 
-  # replace `formula(reg_formula)` with the actual formula (needed for `gls_spatial_predict`)
+  # replace `formula(reg_formula)` with the actual formula (needed for `gls_spatial_predict`) only if regression was run
   for(i in 1:length(reg_results_final)){
-    reg_results_final[[i]]$call[[2]] <- formula(reg_formula)
+    if(!is.na(reg_results_final[[i]][[1]])){
+      reg_results_final[[i]]$call[[2]] <- formula(reg_formula)
+    } else {
+      reg_results_final[[i]] <- NA
+    }
   }
+
+  # remove regression with no results and take note of them
+  reg_failed_LCs <- names(which(is.na(reg_results_final)))
+  reg_failed_LCs <- paste0('Regressions failed for landcover(s): ', reg_failed_LCs, '. Check that there are sufficient data points!')
+  reg_results_final <- reg_results_final[lengths(reg_results_final)>1]
 
 
 
@@ -154,10 +165,10 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
   ### return the regression results and resid plot ###
 
   # combine results and plot
-  reg_results_final <- list(reg_results_final, resids_plot)
+  reg_results_final <- list(reg_results_final, resids_plot, reg_failed_LCs)
 
   # name list elements
-  names(reg_results_final) <- c('Regression results', 'Residuals plot')
+  names(reg_results_final) <- c('Regression results', 'Residuals plot', "Failed regressions")
 
   return(reg_results_final)
 

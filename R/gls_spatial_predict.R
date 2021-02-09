@@ -82,7 +82,7 @@ gls_spatial_predict <- function(data, regression_results, landcover_varname, lan
   pred_val_current <- NA
   for(i in 1:nrow(data)){
 
-    # if you didn't run a regression for that landcover, return the actual value
+    # if you didn't run a regression for that landcover or the regression failed, return the actual value
     if(!(as.character(data[, landcover_varname][[i]]) %in% names(regression_results[[1]]))){ pred_val_current[[i]] <- data[i, dep_varname]}
 
     # otherwise, return the predicted value
