@@ -13,7 +13,6 @@
 #' @param priority_categories numerical. If `value_type = 'priority'`, specifies the number of non-zero priority categories to plot. Default is 5. If `priority_colors` are not specified, max value is 9.
 #' @param priority_outlier_value numerical. A value specifying an additional priority category for outliers. Can be either positive or negative.
 #' @param decimal_points numerical. Specifies the number of decimal points to report in the legend. Default is 0.
-#' @param priority_colors vector. If `value_type = 'priority'`, a vector of colors of `length(priority_categories)+1` to customize priority category colors. The first value is for 'No change', and the rest are for the priority categories. Default is rainbow colors, with values of 0 being grayed out. If `priority_outlier_value` is provided, an additional color must be specified for the outlier category. That is, you must provide a vector of `length(priority_categories)+2` colors.
 #' @param flip_colors logical. Should the priority colors be flipped? Default is `FALSE`. Useful for negative values.
 #' @param ... Pass additional arguments to adjust the legend and coloring (breaks, labels, limits, color/fill, etc.)
 #' @param RColorBrewer_type character string. For `value_type = 'categorical'`, specify the `RColorBrewer` `type`. See `?RColorBrewer`. Default is `'qual'`
@@ -57,9 +56,8 @@
 
 
 ### FUNCTION:
-LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), font_size = 11, break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA,
+LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = TRUE, legend_title = element_blank(), font_size = 15, break_at_zero = FALSE, priority_categories = 5, priority_outlier_value = NA,
                           decimal_points = 0,
-                          priority_colors = if(!is.na(priority_outlier_value)){c('lightgray', viridis::viridis(priority_categories+1))} else {c('lightgray', viridis::viridis(priority_categories))},
                           flip_colors = FALSE,
                           RColorBrewer_type = 'qual', RColorBrewer_palette = 'Dark2',
                           continuous_type = 'viridis',
@@ -70,7 +68,7 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
 
   # initial plot
-  main_plot <- gplot(raster) +
+  main_plot <- rasterVis::gplot(raster) +
 
     coord_equal() +
 
@@ -136,10 +134,11 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
 
     # get all values of the raster
-    raster_val = values(raster)
+    raster_val = raster::values(raster)
 
     # get breaks based on specified number of priority categories
     raster_val_breaks = quantile(raster_val[raster_val != 0 & !is.na(raster_val)], probs = seq(0, 1, length.out = priority_categories + 1), na.rm = TRUE)
+    if(break_at_zero) raster_val_breaks = c(0, raster_val_breaks); raster_val_breaks = raster_val_breaks[order(raster_val_breaks)]
 
     # replace raster_val with interval from rater_val_breaks
     raster_val_interval <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
@@ -173,19 +172,37 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
     legend_labels <- c('No change', legend_labels)
 
 
+    # create vector of colors depending on if a outlier value is provided and if legend is to be split at 0
+    if(!is.na(priority_outlier_value) & !break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories+1))
+    } else if(is.na(priority_outlier_value) & !break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories))
+    } else if(is.na(priority_outlier_value) & break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories+1))
+    } else if(!is.na(priority_outlier_value) & break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories+2))
+    }
+
+
+    # convert raster2 to a data.frame to get rid of NAs
+    raster2_df <- as.data.frame(raster2, xy = TRUE)
+    raster2_df <- raster2_df[!is.na(raster2_df[,3]),]
+    colnames(raster2_df) <- c('x', 'y', 'value')
+
+
     # plot priority raster according to whether the colors are flipped
     if(isTRUE(flip_colors)){
 
-      main_plot <- rasterVis::gplot(raster2) +
-        geom_raster(aes(fill = as.character(value))) +
+      main_plot <- ggplot(raster2_df) +
+        geom_raster(aes(x = x, y = y, fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
         scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])), na.translate = FALSE)
 
     } else {
 
-      main_plot <- rasterVis::gplot(raster2) +
-        geom_raster(aes(fill = as.character(value))) +
+      main_plot <- ggplot(raster2_df) +
+        geom_raster(aes(x = x, y = y, fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
         scale_fill_manual(labels = legend_labels, values = priority_colors, na.translate = FALSE)
@@ -200,21 +217,25 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
 
 
     # get all values of the raster
-    raster_val = values(raster)[values(raster) != 0]
-
+    raster_val = raster::values(raster)
 
     # get breaks based on specified number of priority categories
-    raster_val_breaks = quantile(raster_val, probs = seq(0, 1, length.out = priority_categories + 1), na.rm = TRUE)
-
+    raster_val_breaks = quantile(raster_val[raster_val != 0 & !is.na(raster_val)], probs = seq(0, 1, length.out = priority_categories + 1), na.rm = TRUE)
+    if(break_at_zero) raster_val_breaks = c(0, raster_val_breaks); raster_val_breaks = raster_val_breaks[order(raster_val_breaks)]
 
     # add outlier value to the breaks
     raster_val_breaks <- c(raster_val_breaks, priority_outlier_value)
     raster_val_breaks <- raster_val_breaks[order(raster_val_breaks)]
 
+    # replace raster_val with interval from rater_val_breaks
+    raster_val_interval <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
 
     # create new raster with the priority values rather than continuous values
     raster2 <- raster
-    values(raster2)[values(raster2) != 0] <- findInterval(raster_val, raster_val_breaks, all.inside = TRUE)
+    values(raster2) <- raster_val_interval
+
+    # replace values of 0 in case one category includes values above and below 0
+    raster2[raster == 0] <- 0
 
 
     # create labels based on priority category cutoffs
@@ -247,22 +268,40 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
     }
 
 
+    # create vector of colors depending on if a outlier value is provided and if legend is to be split at 0
+    if(!is.na(priority_outlier_value) & !break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories+1))
+    } else if(is.na(priority_outlier_value) & !break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories))
+    } else if(is.na(priority_outlier_value) & break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories+1))
+    } else if(!is.na(priority_outlier_value) & break_at_zero){
+      priority_colors <- c('lightgray', viridis::viridis(priority_categories+1))
+    }
+
+
+    # convert raster2 to a data.frame to get rid of NAs
+    raster2_df <- as.data.frame(raster2, xy = TRUE)
+    raster2_df <- raster2_df[!is.na(raster2_df[,3]),]
+    colnames(raster2_df) <- c('x', 'y', 'value')
+
+
     # plot priority raster according to whether the colors are flipped
     if(isTRUE(flip_colors)){
 
-      main_plot <- rasterVis::gplot(raster2) +
-        geom_raster(aes(fill = as.character(value))) +
+      main_plot <- ggplot(raster2_df) +
+        geom_raster(aes(x = x, y = y, fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
-        scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])))
+        scale_fill_manual(labels = legend_labels, values = priority_colors, na.value='transparent')
 
     } else {
 
-      main_plot <- rasterVis::gplot(raster2) +
-        geom_raster(aes(fill = as.character(value))) +
+      main_plot <- ggplot(raster2_df) +
+        geom_raster(aes(x = x, y = y, fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
-        scale_fill_manual(labels = legend_labels, values = priority_colors)
+        scale_fill_manual(labels = legend_labels, values = priority_colors, na.value='transparent')
 
     }
 

@@ -20,6 +20,7 @@ SimulationPlots(
   decimal_places = 2,
   infest_label = "Invasive",
   suscep_label = "Susceptible",
+  positive_vals_only = TRUE,
   n_grid = NA
 )
 }
@@ -43,6 +44,8 @@ SimulationPlots(
 \item{flip_colors}{logical. Flips the colors of the raster plots}
 
 \item{decimal_places}{numerical. Number of decimal places to report on the legend of continuous plots.}
+
+\item{positive_vals_only}{logical. When plotting the line graph, should the negative values be removed when aggregating by year?}
 
 \item{n_grid}{numerical. If you want a grid of timelapse figures, specify the number of plots.}
 }

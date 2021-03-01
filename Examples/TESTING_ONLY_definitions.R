@@ -72,3 +72,44 @@ dat_sample = 5000
 covar_adjustment = list('temp', 0)
 unit_converter = 100
 num_cores = 5
+
+
+
+# Hanaula ranch
+data = allvars
+shp_app = shp_app
+shp_reg = shp_moku_overlap
+landcover_varname = "LC"
+reg_formula = AET~LAI+U+T+Rnet+SM
+landcover_invasive = 32
+landcover_susceptible = c(8,10,13)
+dat_sample = 5000
+x_coords_varname = 'POINT_X'
+y_coords_varname = 'POINT_Y'
+spread_rate = 0.05
+birdcell = 0
+simlength = 50
+simulation_count = 100
+dep_var_modifier = 0.55
+num_cores = 5
+covar_adjustment = list('LAI',median_LAI)
+unit_converter = 1
+outlier_value = -100
+zero_break = TRUE
+
+
+
+# Kauai simulation_by_moku
+k=1
+data = dat_split[[k]]; landcover_varname = 'LC'; reg_formula = AET ~ LAI + U + T + Rnet + SM; landcover_invasive = 32; landcover_susceptible = c(8,10,13);
+x_coords_varname = 'POINT_X'; y_coords_varname = 'POINT_Y';
+spread_rate = 0.05; birdcell = 0; simlength = 50;
+dep_var_modifier=1; unit_converter=1;
+covar_adjustment = list('LAI', median(dat_split[[k]][dat_split[[k]]$LC==32,'LAI'], na.rm = TRUE)); dat_sample = 300
+
+
+
+# kauai kwa
+data = allvars; shp_app = shp_reg_region; shp_reg = shp_reg_region; landcover_varname = "LC"; reg_formula = AET~LAI+U+T+Rnet+SM; landcover_invasive = 32; landcover_susceptible = c(8,9,10,13);
+dat_sample = 800; x_coords_varname = 'POINT_X'; y_coords_varname = 'POINT_Y'; spread_rate = 0.05; birdcell = 0; simlength = 50; simulation_count = 100; dep_var_modifier = 0.36;
+num_cores = 5; covar_adjustment = list('LAI',median_LAI); unit_converter = 1; zero_break = FALSE; outlier_value = NA; dep_var_plot_label = 'mm/yr'; dep_var_plot_label_cumulative = 'mm'

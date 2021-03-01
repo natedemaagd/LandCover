@@ -26,6 +26,12 @@
 #' @param dep_var_modifier numerical. A scalar to optionally return a list of rasters with modified dep_var rasters (e.g. multiply water yield rasters to obtain recharge rasters)
 #' @param unit_converter numerical. A scalar to optionally modify the values of the resulting dependent variable (and modified dependent variable, if present) to convert units (e.g. mm/yr to gal/acre/day). Default value is `1`.
 #' @param covar_adjustment list. List specifying change in covariate values. See ?gls_spatial_predict.
+#' @param zero_break numerical. Should the priority plots have a breakpoint at 0 if values are both negative and positive?
+#' @param outlier_value numerical. Cutoff value for outliers in the priority plots.
+#' @param dep_var_plot_label character. Label for the dependent variable used in plots.
+#' @param dep_var_plot_label_cumulative character. Legend title for the cumulative change priority plot (also applied to modified values, if `dep_var_modifier` provided).
+#' @param line_plot_labels character vector of length 1 or 2, for dependent variable and modified dependent variable if provided, for the line graph. e.g. `c('Water yield', 'Recharge')`
+#' @param line_plot_positive_vals_only logical. When plotting the line graph, should the negative values be removed when aggregating by year?
 #' @param num_cores numerical. Number of cores for parallel processing, max 5
 #'
 #' @return A list of all objects returned by the individual functions
@@ -56,7 +62,13 @@ fullSimulationApp <- function(data,
                            simulation_count = 100,
                            dep_var_modifier = NA,
                            unit_converter = 1,
-                           covar_adjustment = NA,
+                           covar_adjustment = 1,
+                           zero_break = FALSE,
+                           outlier_value = NA,
+                           dep_var_plot_label = 'mm/yr',
+                           dep_var_plot_label_cumulative = 'mm',
+                           line_plot_labels = c('Water yield', 'Recharge'),
+                           line_plot_positive_vals_only = TRUE,
                            num_cores = parallel::detectCores() - 1){
 
 
@@ -105,14 +117,15 @@ fullSimulationApp <- function(data,
   # if regression shapefile provided, sample data
   if(!is.null(shp_reg)){
     data_regression <- data[data[,landcover_varname] %in% landcover_vec,]
-    data_regression <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
+    data_regression$LC_split_var <- data_regression[,landcover_varname]   # add a column we can use to split the data in datSubset (needs a standardized name)
+    data_regression <- datSubset(data=data_regression, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
     data_regression <- data_regression$RegressionData
   }
 
   # if landcover application shapefile provided, subset data
   if(!is.null(shp_app)){
 
-    data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app, sample=dat_sample)
+    data_app <- datSubset(data=data, x_coords_varname=x_coords_varname, y_coords_varname=y_coords_varname, shp_reg=shp_reg, shp_app=shp_app)
     data_app <- data_app$SimulationData
 
   }
@@ -175,7 +188,7 @@ fullSimulationApp <- function(data,
   e         <- raster::extent(as.matrix(data_app[c(x_coords_varname, y_coords_varname)]))  # create extent to match data_app
   r         <- raster::raster(e, ncol = nrow(unique(data_app[x_coords_varname])), nrow = nrow(unique(data_app[y_coords_varname])))  # create raster for data_app
   lc_raster <- raster::rasterize(as.matrix(data_app[c(x_coords_varname, y_coords_varname)]), r, as.numeric(data_app[,landcover_varname]))  # rasterize data_app using e and r
-  lc_raster <- setExtent(lc_raster, predVals$`Predicted values raster, current landcover`)  # rescale the new raster to match the extent of original data
+  lc_raster <- raster::setExtent(lc_raster, predVals$`Predicted values raster, current landcover`)  # rescale the new raster to match the extent of original data
 
   landcover_sim <- LandCoverSpread(infest_val=landcover_invasive, suscep_val=landcover_susceptible, spread_rate=spread_rate, birdcell=birdcell, simlength=simlength, simulation_count=simulation_count,
                                    lc_raster=lc_raster, dep_var_raster_initial=predVals$`Predicted values raster, current landcover`,
@@ -189,12 +202,15 @@ fullSimulationApp <- function(data,
 
   # SimulationPlots
   simPlots <- SimulationPlots(landcover_sim_results=landcover_sim, depvar_sim_results=depvar_sim, infest_val=landcover_invasive, suscep_val=landcover_susceptible,
-                              font_size = 15, n_grid = 6)
+                              font_size = 15, n_grid = 6, dep_var_label = dep_var_plot_label, color_labels = line_plot_labels)
 
   # LandCoverPlot priority maps
-  priorityPlots        <- list(LandCoverPlot(raster = predVals$`Predicted values raster, change`,    value_type = 'priority', decimal_points = 2),
-                               LandCoverPlot(raster = depvar_sim$depvar_cumulative_change,           value_type = 'priority', decimal_points = 2),
-                               LandCoverPlot(raster = depvar_sim$depvar_cumulative_change_modified,  value_type = 'priority', decimal_points = 2))
+  priorityPlots        <- list(LandCoverPlot(raster = predVals$`Predicted values raster, change`,    value_type = 'priority', decimal_points = 2, break_at_zero = zero_break, priority_outlier_value = outlier_value,
+                                             legend_title = dep_var_plot_label),
+                               LandCoverPlot(raster = depvar_sim$depvar_cumulative_change,           value_type = 'priority', decimal_points = 2, break_at_zero = zero_break, priority_outlier_value = outlier_value,
+                                             legend_title = dep_var_plot_label_cumulative),
+                               LandCoverPlot(raster = depvar_sim$depvar_cumulative_change_modified,  value_type = 'priority', decimal_points = 2, break_at_zero = zero_break, priority_outlier_value = outlier_value,
+                                             legend_title = dep_var_plot_label_cumulative))
   names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
 
   # plot original landcover and shapefile(s)
@@ -210,14 +226,14 @@ fullSimulationApp <- function(data,
             text = element_text(size = 15)) +
       scale_fill_viridis_d()
   }
-  # both shapfiles given
+  # both shapefiles given
   if(!is.null(shp_reg) & !is.null(shp_app)){
     landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
       scale_fill_viridis_d() +
-      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent') +
-      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'blue', fill = 'transparent')
+      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent', linetype = 'solid', size = 0.8) +
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'red', fill = 'transparent', linetype = 'longdash', size = 0.8)
   }
   # shp_reg only
   if(!is.null(shp_reg) & is.null(shp_app)){
@@ -225,7 +241,7 @@ fullSimulationApp <- function(data,
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
       scale_fill_viridis_d() +
-      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent')
+      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent', linetype = 'solid', size = 0.8)
   }
   # shp_app only
   if(is.null(shp_reg) & !is.null(shp_app)){
@@ -233,7 +249,7 @@ fullSimulationApp <- function(data,
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
       scale_fill_viridis_d() +
-      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'blue', fill = 'transparent')
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'red', fill = 'transparent', linetype = 'longdash', size = 0.8)
     }
 
 
@@ -241,8 +257,8 @@ fullSimulationApp <- function(data,
 
   ##### return results
 
-  results_list        <- list(landcover_shp_plot, regression_results, predVals, landcover_sim, depvar_sim, simPlots, priorityPlots)
-  names(results_list) <- c('preview_plot', 'gls_spatial', 'gls_spatial_predict', 'LandCoverSpread', 'DepvarSpread', 'SimulationPlots', 'PriorityPlots')
+  results_list        <- list(landcover_shp_plot, regression_results, predVals, landcover_sim, depvar_sim, simPlots, priorityPlots, data_regression, data_app)
+  names(results_list) <- c('preview_plot', 'gls_spatial', 'gls_spatial_predict', 'LandCoverSpread', 'DepvarSpread', 'SimulationPlots', 'PriorityPlots', 'Regression data', 'Simulation application data')
 
   return(results_list)
 

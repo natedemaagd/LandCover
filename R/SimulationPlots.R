@@ -14,6 +14,7 @@
 #' @param line_thickness value. For the line graph, the thickness of the lines.
 #' @param flip_colors logical. Flips the colors of the raster plots
 #' @param decimal_places numerical. Number of decimal places to report on the legend of continuous plots.
+#' @param positive_vals_only logical. When plotting the line graph, should the negative values be removed when aggregating by year?
 #' @param n_grid numerical. If you want a grid of timelapse figures, specify the number of plots.
 #'
 #' @return A list of landcover plots and line plots associated with the landcover spread simulation.
@@ -64,6 +65,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
                             decimal_places = 2,
                             infest_label = 'Invasive',
                             suscep_label = 'Susceptible',
+                            positive_vals_only = TRUE,
                             n_grid = NA){
 
 
@@ -94,7 +96,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
       geom_raster(aes(x, y, fill = landcover_category)) +
 
-      scale_fill_manual(values = lc_colors[1:length(unique(df$landcover_category))], name = 'Landcover') +
+      scale_fill_manual(values = c('Invasive' = '#FDE725FF', 'Susceptible' = '#440154FF', 'Other' = 'lightgray'), name = 'Landcover') +
 
       coord_equal() +
 
@@ -238,10 +240,16 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
   # if depvar is modified, create line graph with depvar and modified depvar
   if(isTRUE(dep_var_modified)){
 
-    # get data
-    LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1                                                   ),
-                                dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r), na.rm = TRUE) }),
-                                dep_var_modified = sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){ sum(values(r), na.rm = TRUE) }))
+    # get data - sum of raster values depends on whether only positive values are wanted
+    if(positive_vals_only){
+      LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1),
+                                  dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r)[values(r)>0], na.rm = TRUE) }),
+                                  dep_var_modified = sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){ sum(values(r)[values(r)>0], na.rm = TRUE) }))
+    } else {
+      LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1),
+                                  dep_var          = sapply(depvar_sim_results$depvar_list_change_from_year_0,          function(r){ sum(values(r), na.rm = TRUE) }),
+                                  dep_var_modified = sapply(depvar_sim_results$depvar_list_change_from_year_0_modified, function(r){ sum(values(r), na.rm = TRUE) }))
+    }
 
 
     # melt data
@@ -264,7 +272,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
   } else {
 
     # adjust colors if they're specified
-    if(is.na(line_colors)){ line_colors = viridis(2)} else { line_colors = line_colors}
+    if(is.na(line_colors[[1]])){ line_colors = viridis(2)} else { line_colors = line_colors}
 
     # get data
     LineGraphData <- data.frame(Year             = 0:(length(landcover_sim_results$list_of_landcover_rasters)-1                                                   ),

@@ -82,7 +82,7 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
   # run regression for each type of land cover
   for(i in 1:length(landcover_vec)){
 
-    # run regression on each spatial correlation type
+    # for each land cover type, run regression on each spatial correlation type
     reg_results[[i]] <- foreach::foreach(j = 1:length(corr_types)) %dopar% {
 
       # try to run the regression for correlation type j
@@ -96,23 +96,37 @@ gls_spatial <- function(data, landcover_varname, landcover_vec, reg_formula, err
 
     }
 
-    # keep only results with the lowest RMSE
-    RMSE_fcn <- function(error) { sqrt(mean(error^2)) }                                                                         # RMSE function
-    RMSEs <- list()                                                                                                             # get RMSEs for all regressions j for landcover i
-    for(j in 1:length(reg_results[[i]])){ RMSEs[[j]] <- try(RMSE_fcn(error = reg_results[[i]][[j]]$residuals), silent = TRUE) }
-    RMSEs <- sapply(RMSEs, function(r){ ifelse(is(r, 'try-error'), NA, r)})
-    reg_results[[i]] <- reg_results[[i]][[which.min(RMSEs)]]                                                                    # keep only regression w/ lowest RMSE
-
-    # cleanup
-    rm(RMSEs); gc()
     if(isFALSE(silent)) print(paste0('Completed landcover ', landcover_vec[[i]], ' at ', Sys.time()))
 
   }
 
+
+
+  ### keep only the results with the lowest RMSE for each landcover ###
+
+  # get RMSEs for each land cover regression
+
+  RMSE_fcn <- function(error) { sqrt(mean(error^2)) }   # RMSE function
+
+  RMSEs <- foreach::foreach(i = 1:length(reg_results)) %dopar% {
+
+    RMSEs_i <- list()
+    for(j in 1:length(reg_results[[i]])){
+      reg_ij <- reg_results[[i]][[j]]
+      RMSEs_i[[j]] <- if(is.na(reg_ij)[[1]]){NA} else {RMSE_fcn(reg_ij$residuals)}
+    }
+
+    return(RMSEs_i)
+
+  }
+
+  # get the minimum RMSE from each landcover model
+  RMSE_min <- sapply(RMSEs, which.min)
+
   # get final list of regression results, one for each landcover, corresponding to the model with lowest AIC
     # if regression has too few data points, it will return an error. If there is an error, return NA for that regression
   reg_results_final <- list()
-  for(i in 1:length(reg_results)){ reg_results_final[[i]] <- try(reg_results[[i]], silent = TRUE)}
+  for(i in 1:length(reg_results)){ reg_results_final[[i]] <- try(reg_results[[i]][[RMSE_min[[i]]]], silent = TRUE)}
   for(i in 1:length(reg_results)){ reg_results_final[[i]] <- if(class(reg_results_final[[i]]) == 'try-error'){ reg_results_final[[i]] <- NA} else {reg_results_final[[i]] <- reg_results_final[[i]]} }
 
   # rename elements of `reg_results_final` to match the landcover codes

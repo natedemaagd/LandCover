@@ -42,8 +42,25 @@ datSubset <- function(data, x_coords_varname, y_coords_varname, shp_reg = NULL, 
                          datSpReg <- datSp[shp_reg,]
   if(!is.null(shp_app)){ datSpApp <- datSp[shp_app,]} else { datSpApp <- datSpReg }
 
-  # if `sample` is specified, sample the regression data iff data has more obs than the requested sample size
-  if(!is.null(sample) & isTRUE(nrow(datSpReg) > sample)) datSpReg <- datSpReg[sample(nrow(datSpReg), sample),]
+  # if `sample` is specified, sample the data by landcover type
+  if(!is.null(sample)){
+
+    # split data by landcover type
+    datSpReg_split <- split(datSpReg@data, datSpReg@data$LC_split_var)
+
+    # sample each landcover
+    datSpReg_split <- lapply(datSpReg_split, function(df){ df[sample(1:nrow(df), min(sample, nrow(df))),]})
+
+    # recombine into data.frame
+    datSpReg <- do.call(rbind, datSpReg_split)
+
+    # convert back to spatial object
+    if(!is.null(shp_reg)){
+      datSpReg <- sp::SpatialPointsDataFrame(coords = datSpReg[c(x_coords_varname, y_coords_varname)], data = datSpReg, proj4string = shp_reg@proj4string)
+    } else {
+      datSpReg <- sp::SpatialPointsDataFrame(coords = datSpReg[c(x_coords_varname, y_coords_varname)], data = datSpReg, proj4string = shp_app@proj4string)
+    }
+  }
 
   # return results
   results <- list(datSpReg, datSpApp)

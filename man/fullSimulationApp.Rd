@@ -22,7 +22,13 @@ fullSimulationApp(
   simulation_count = 100,
   dep_var_modifier = NA,
   unit_converter = 1,
-  covar_adjustment = NA,
+  covar_adjustment = 1,
+  zero_break = FALSE,
+  outlier_value = NA,
+  dep_var_plot_label = "mm/yr",
+  dep_var_plot_label_cumulative = "mm",
+  line_plot_labels = c("Water yield", "Recharge"),
+  line_plot_positive_vals_only = TRUE,
   num_cores = parallel::detectCores() - 1
 )
 }
@@ -62,6 +68,18 @@ fullSimulationApp(
 \item{unit_converter}{numerical. A scalar to optionally modify the values of the resulting dependent variable (and modified dependent variable, if present) to convert units (e.g. mm/yr to gal/acre/day). Default value is \code{1}.}
 
 \item{covar_adjustment}{list. List specifying change in covariate values. See ?gls_spatial_predict.}
+
+\item{zero_break}{numerical. Should the priority plots have a breakpoint at 0 if values are both negative and positive?}
+
+\item{outlier_value}{numerical. Cutoff value for outliers in the priority plots.}
+
+\item{dep_var_plot_label}{character. Label for the dependent variable used in plots.}
+
+\item{dep_var_plot_label_cumulative}{character. Legend title for the cumulative change priority plot (also applied to modified values, if \code{dep_var_modifier} provided).}
+
+\item{line_plot_labels}{character vector of length 1 or 2, for dependent variable and modified dependent variable if provided, for the line graph. e.g. \code{c('Water yield', 'Recharge')}}
+
+\item{line_plot_positive_vals_only}{logical. When plotting the line graph, should the negative values be removed when aggregating by year?}
 
 \item{num_cores}{numerical. Number of cores for parallel processing, max 5}
 
