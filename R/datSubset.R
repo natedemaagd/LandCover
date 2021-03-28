@@ -25,12 +25,6 @@
 ### FUNCTION:
 datSubset <- function(data, x_coords_varname, y_coords_varname, shp_reg = NULL, shp_app = NULL, sample = NULL, convertFromUTM = FALSE) {
 
-  # convert shapefiles from UTM to lat/lon, if specified
-  if(convertFromUTM){
-    if(!is.null(shp_reg)){shp_reg <- sp::spTransform(shp_reg, CRS("+proj=longlat +datum=WGS84"))}
-    if(!is.null(shp_app)){shp_app <- sp::spTransform(shp_app, CRS("+proj=longlat +datum=WGS84"))}
-  }
-
   # convert data to spatial points using shp_reg if available, otherwise use shp_app
   if(!is.null(shp_reg)){
     datSp <- sp::SpatialPointsDataFrame(coords = data[c(x_coords_varname, y_coords_varname)], data = data, proj4string = shp_reg@proj4string)
@@ -38,7 +32,11 @@ datSubset <- function(data, x_coords_varname, y_coords_varname, shp_reg = NULL, 
     datSp <- sp::SpatialPointsDataFrame(coords = data[c(x_coords_varname, y_coords_varname)], data = data, proj4string = shp_app@proj4string)
   }
 
-  # subset the spatial points according to shp_reg and shp_app
+  # ensure CRS are identical between shapefiles, then subset the spatial points according to shp_reg and shp_app
+  common_crs <- CRS("+proj=longlat +datum=WGS84")
+  if(!is.null(shp_app)){shp_app <- sp::spTransform(shp_app, common_crs)}
+  if(!is.null(shp_reg)){shp_reg <- sp::spTransform(shp_reg, common_crs)}
+  datSp <- sp::spTransform(datSp, common_crs)
                          datSpReg <- datSp[shp_reg,]
   if(!is.null(shp_app)){ datSpApp <- datSp[shp_app,]} else { datSpApp <- datSpReg }
 

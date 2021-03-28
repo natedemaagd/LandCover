@@ -64,6 +64,9 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
                           continuous_break0_low = '#440154FF',
                           continuous_break0_high = '#FDE725FF',
                           continuous_break0_mid  = 'lightgray',
+                          priority_plot_scalebar_position = 'bottomright',
+                          priority_plot_scalebar_unit = 'km',
+                          priority_plot_scalebar_dist = 1,
                           categorical_direction = 1){
 
 
@@ -197,7 +200,10 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
         geom_raster(aes(x = x, y = y, fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
-        scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])), na.translate = FALSE)
+        scale_fill_manual(labels = legend_labels, values = c(priority_colors[[1]], rev(priority_colors[2:length(priority_colors)])), na.translate = FALSE) +
+        ggsn::scalebar(transform = TRUE, model = 'WGS84', location = priority_plot_scalebar_position, dist_unit = priority_plot_scalebar_unit, dist = priority_plot_scalebar_dist,
+                       x.min = min(raster2_df$x, na.rm = TRUE), x.max = max(raster2_df$x, na.rm = TRUE),
+                       y.min = min(raster2_df$y, na.rm = TRUE), y.max = max(raster2_df$y, na.rm = TRUE))
 
     } else {
 
@@ -205,7 +211,10 @@ LandCoverPlot <- function(raster, value_type = 'continuous', blank_background = 
         geom_raster(aes(x = x, y = y, fill = as.character(value))) +
         coord_equal() +
         labs(fill = legend_title) +
-        scale_fill_manual(labels = legend_labels, values = priority_colors, na.translate = FALSE)
+        scale_fill_manual(labels = legend_labels, values = priority_colors, na.translate = FALSE) +
+        ggsn::scalebar(transform = TRUE, model = 'WGS84', location = priority_plot_scalebar_position, dist_unit = priority_plot_scalebar_unit, dist = priority_plot_scalebar_dist,
+                       x.min = min(raster2_df$x, na.rm = TRUE), x.max = max(raster2_df$x, na.rm = TRUE),
+                       y.min = min(raster2_df$y, na.rm = TRUE), y.max = max(raster2_df$y, na.rm = TRUE))
 
     }
 

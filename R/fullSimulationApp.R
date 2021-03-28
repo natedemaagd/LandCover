@@ -2,7 +2,7 @@
 #'
 #' This function runs the entire simulation by wrapping all other functions into a single function, accepting all default customization options
 #'
-#' @import nlme doParallel foreach parallel viridis rgdal sp readxl
+#' @import nlme doParallel foreach parallel viridis rgdal sp readxl ggsn
 #' @importFrom foreach %dopar%
 #'
 #' @param data_as_directories logical. `TRUE` if data and shapefiles must be loaded from files. `FALSE` if data and shapefiles are `R` objects already loaded in the environment.
@@ -69,6 +69,15 @@ fullSimulationApp <- function(data,
                            dep_var_plot_label_cumulative = 'mm',
                            line_plot_labels = c('Water yield', 'Recharge'),
                            line_plot_positive_vals_only = TRUE,
+                           line_plot_axis_label = 'mm/yr',
+                           landcover_label_invasive = 'Invasive',
+                           landcover_label_susceptible = 'Susceptible',
+                           preview_plot_scalebar_position = 'bottomright',
+                           preview_plot_scalebar_unit = 'km',
+                           preview_plot_scalebar_dist = 10,
+                           priority_plot_scalebar_position = 'bottomright',
+                           priority_plot_scalebar_unit = 'km',
+                           priority_plot_scalebar_dist = 1,
                            num_cores = parallel::detectCores() - 1){
 
 
@@ -202,54 +211,85 @@ fullSimulationApp <- function(data,
 
   # SimulationPlots
   simPlots <- SimulationPlots(landcover_sim_results=landcover_sim, depvar_sim_results=depvar_sim, infest_val=landcover_invasive, suscep_val=landcover_susceptible,
-                              font_size = 15, n_grid = 6, dep_var_label = dep_var_plot_label, color_labels = line_plot_labels)
+                              font_size = 15, n_grid = 6, dep_var_label = dep_var_plot_label, line_color_labels = line_plot_labels, line_plot_axis_label = line_plot_axis_label,
+                              infest_label = landcover_label_invasive, suscep_label = landcover_label_susceptible,
+                              )
 
   # LandCoverPlot priority maps
   priorityPlots        <- list(LandCoverPlot(raster = predVals$`Predicted values raster, change`,    value_type = 'priority', decimal_points = 2, break_at_zero = zero_break, priority_outlier_value = outlier_value,
-                                             legend_title = dep_var_plot_label),
+                                             legend_title = dep_var_plot_label,
+                                             priority_plot_scalebar_position = priority_plot_scalebar_position, priority_plot_scalebar_dist = priority_plot_scalebar_dist,
+                                             priority_plot_scalebar_unit = priority_plot_scalebar_unit),
+                               LandCoverPlot(raster = predVals$`Predicted values raster, change`*dep_var_modifier,
+                                                                                                     value_type = 'priority', decimal_points = 2, break_at_zero = zero_break, priority_outlier_value = outlier_value,
+                                             legend_title = dep_var_plot_label,
+                                             priority_plot_scalebar_position = priority_plot_scalebar_position, priority_plot_scalebar_dist = priority_plot_scalebar_dist,
+                                             priority_plot_scalebar_unit = priority_plot_scalebar_unit),
                                LandCoverPlot(raster = depvar_sim$depvar_cumulative_change,           value_type = 'priority', decimal_points = 2, break_at_zero = zero_break, priority_outlier_value = outlier_value,
-                                             legend_title = dep_var_plot_label_cumulative),
+                                             legend_title = dep_var_plot_label_cumulative,
+                                             priority_plot_scalebar_position = priority_plot_scalebar_position, priority_plot_scalebar_dist = priority_plot_scalebar_dist,
+                                             priority_plot_scalebar_unit = priority_plot_scalebar_unit),
                                LandCoverPlot(raster = depvar_sim$depvar_cumulative_change_modified,  value_type = 'priority', decimal_points = 2, break_at_zero = zero_break, priority_outlier_value = outlier_value,
-                                             legend_title = dep_var_plot_label_cumulative))
-  names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
+                                             legend_title = dep_var_plot_label_cumulative,
+                                             priority_plot_scalebar_position = priority_plot_scalebar_position, priority_plot_scalebar_dist = priority_plot_scalebar_dist,
+                                             priority_plot_scalebar_unit = priority_plot_scalebar_unit))
+
+  names(priorityPlots) <- c('Priority map, change in dep var', 'Priority map, change in modified dep var', 'Priority map, cumulative dep var', 'Priority map, cumulative modified dep var')
 
   # plot original landcover and shapefile(s)
 
     # first create new data - full region with landcover type (susceptible, invasive, or other)
     data_lctypes <- data
-    data_lctypes$`Landcover type` <- ifelse(data_lctypes[,landcover_varname] == landcover_invasive, 'Invasive', ifelse(data_lctypes[,landcover_varname] %in% landcover_susceptible, 'Susceptible', 'Other'))
+    data_lctypes$`Landcover type` <- ifelse(data_lctypes[,landcover_varname] == landcover_invasive, landcover_label_invasive,
+                                            ifelse(data_lctypes[,landcover_varname] %in% landcover_susceptible, landcover_label_susceptible,
+                                                   'Other'))
+
+    lc_groups <- factor(c(landcover_label_invasive, landcover_label_susceptible, 'Other'), levels = c(landcover_label_invasive, landcover_label_susceptible, 'Other'))
+    lc_groups_colors <- c('#FDE725FF', '#440154FF', 'lightgray')
 
   # both shapefiles missing
   if(is.null(shp_reg) & is.null(shp_app)){
     landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
-      scale_fill_viridis_d()
+      scale_fill_manual(limits = lc_groups, values = lc_groups_colors, name = 'Landcover') +
+      ggsn::scalebar(transform = TRUE, model = 'WGS84', location = preview_plot_scalebar_position, dist_unit = preview_plot_scalebar_unit, dist = preview_plot_scalebar_dist,
+                     x.min = min(data_lctypes[,x_coords_varname], na.rm = TRUE), x.max = max(data_lctypes[,x_coords_varname], na.rm = TRUE),
+                     y.min = min(data_lctypes[,y_coords_varname], na.rm = TRUE), y.max = max(data_lctypes[,y_coords_varname], na.rm = TRUE))
   }
   # both shapefiles given
   if(!is.null(shp_reg) & !is.null(shp_app)){
     landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
-      scale_fill_viridis_d() +
+      scale_fill_manual(limits = lc_groups, values = lc_groups_colors, name = 'Landcover') +
       geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent', linetype = 'solid', size = 0.8) +
-      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'red', fill = 'transparent', linetype = 'longdash', size = 0.8)
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'red', fill = 'transparent', linetype = 'longdash', size = 0.8) +
+      ggsn::scalebar(transform = TRUE, model = 'WGS84', location = preview_plot_scalebar_position, dist_unit = preview_plot_scalebar_unit, dist = preview_plot_scalebar_dist,
+                     x.min = min(data_lctypes[,x_coords_varname], na.rm = TRUE), x.max = max(data_lctypes[,x_coords_varname], na.rm = TRUE),
+                     y.min = min(data_lctypes[,y_coords_varname], na.rm = TRUE), y.max = max(data_lctypes[,y_coords_varname], na.rm = TRUE))
   }
   # shp_reg only
   if(!is.null(shp_reg) & is.null(shp_app)){
     landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
-      scale_fill_viridis_d() +
-      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent', linetype = 'solid', size = 0.8)
+      scale_fill_manual(limits = lc_groups, values = lc_groups_colors, name = 'Landcover') +
+      geom_polygon(data = shp_reg, aes(x = long, y = lat), color = 'red',  fill = 'transparent', linetype = 'solid', size = 0.8) +
+      ggsn::scalebar(transform = TRUE, model = 'WGS84', location = preview_plot_scalebar_position, dist_unit = preview_plot_scalebar_unit, dist = preview_plot_scalebar_dist,
+                     x.min = min(data_lctypes[,x_coords_varname], na.rm = TRUE), x.max = max(data_lctypes[,x_coords_varname], na.rm = TRUE),
+                     y.min = min(data_lctypes[,y_coords_varname], na.rm = TRUE), y.max = max(data_lctypes[,y_coords_varname], na.rm = TRUE))
   }
   # shp_app only
   if(is.null(shp_reg) & !is.null(shp_app)){
     landcover_shp_plot <- ggplot(data = data_lctypes, aes_string(x = x_coords_varname, y = y_coords_varname)) + geom_raster(aes(fill = `Landcover type`), alpha = 0.7) + coord_equal() +
       theme(axis.title = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), panel.background = element_blank(),
             text = element_text(size = 15)) +
-      scale_fill_viridis_d() +
-      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'red', fill = 'transparent', linetype = 'longdash', size = 0.8)
+      scale_fill_manual(limits = lc_groups, values = lc_groups_colors, name = 'Landcover') +
+      geom_polygon(data = shp_app, aes(x = long, y = lat), color = 'red', fill = 'transparent', linetype = 'longdash', size = 0.8) +
+      ggsn::scalebar(transform = TRUE, model = 'WGS84', location = preview_plot_scalebar_position, dist_unit = preview_plot_scalebar_unit, dist = preview_plot_scalebar_dist,
+                     x.min = min(data_lctypes[,x_coords_varname], na.rm = TRUE), x.max = max(data_lctypes[,x_coords_varname], na.rm = TRUE),
+                     y.min = min(data_lctypes[,y_coords_varname], na.rm = TRUE), y.max = max(data_lctypes[,y_coords_varname], na.rm = TRUE))
     }
 
 

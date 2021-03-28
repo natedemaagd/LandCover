@@ -21,6 +21,9 @@ LandCoverPlot(
   continuous_break0_low = "#440154FF",
   continuous_break0_high = "#FDE725FF",
   continuous_break0_mid = "lightgray",
+  priority_plot_scalebar_position = "bottomright",
+  priority_plot_scalebar_unit = "km",
+  priority_plot_scalebar_dist = 1,
   categorical_direction = 1
 )
 }

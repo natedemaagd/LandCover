@@ -14,8 +14,9 @@ SimulationPlots(
   dep_var_modified_label = "dep_var_modified",
   font_size = 15,
   line_thickness = 0.8,
-  line_colors = viridis(2),
-  color_labels = c("Dep. var.", "Modified dep. var."),
+  line_colors = viridis(3)[1:2],
+  line_color_labels = c("Dep. var.", "Modified dep. var."),
+  line_plot_axis_label = "Dep. var.",
   flip_colors = FALSE,
   decimal_places = 2,
   infest_label = "Invasive",
@@ -39,7 +40,7 @@ SimulationPlots(
 
 \item{line_thickness}{value. For the line graph, the thickness of the lines.}
 
-\item{color_labels}{character vector. If \code{dep_var_modified == TRUE}, specifies the labels for the dependent variable and the modified dependent variable.}
+\item{line_color_labels}{character vector. If \code{dep_var_modified == TRUE}, specifies the labels for the dependent variable and the modified dependent variable.}
 
 \item{flip_colors}{logical. Flips the colors of the raster plots}
 

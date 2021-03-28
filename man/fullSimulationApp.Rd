@@ -29,6 +29,15 @@ fullSimulationApp(
   dep_var_plot_label_cumulative = "mm",
   line_plot_labels = c("Water yield", "Recharge"),
   line_plot_positive_vals_only = TRUE,
+  line_plot_axis_label = "mm/yr",
+  landcover_label_invasive = "Invasive",
+  landcover_label_susceptible = "Susceptible",
+  preview_plot_scalebar_position = "bottomright",
+  preview_plot_scalebar_unit = "km",
+  preview_plot_scalebar_dist = 10,
+  priority_plot_scalebar_position = "bottomright",
+  priority_plot_scalebar_unit = "km",
+  priority_plot_scalebar_dist = 1,
   num_cores = parallel::detectCores() - 1
 )
 }

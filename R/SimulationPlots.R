@@ -9,7 +9,7 @@
 #' @param infest_val numerical. The value of the invasive landcover.
 #' @param suscep_val numerical. Vector of landcover values that are susceptible to the spread.
 #' @param dep_var_modified logical. If `TRUE`, creates line graphs with added modified dependent variable from the simulation. Requires `dep_var_modifier` to be specified in `LandCoverSpread`.
-#' @param color_labels character vector. If `dep_var_modified == TRUE`, specifies the labels for the dependent variable and the modified dependent variable.
+#' @param line_color_labels character vector. If `dep_var_modified == TRUE`, specifies the labels for the dependent variable and the modified dependent variable.
 #' @param font_size value. Font size of text in the figure.
 #' @param line_thickness value. For the line graph, the thickness of the lines.
 #' @param flip_colors logical. Flips the colors of the raster plots
@@ -60,7 +60,8 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
                             dep_var_label = 'dep_var',
                             dep_var_modified_label = 'dep_var_modified',
                             font_size = 15, line_thickness = 0.8,
-                            line_colors = viridis(2), color_labels = c('Dep. var.', 'Modified dep. var.'),
+                            line_colors = viridis(3)[1:2], line_color_labels = c('Dep. var.', 'Modified dep. var.'),
+                            line_plot_axis_label = 'Dep. var.',
                             flip_colors = FALSE,
                             decimal_places = 2,
                             infest_label = 'Invasive',
@@ -91,12 +92,16 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
     lc_colors <- viridis(length(unique(df$landcover_category)))
     if(isTRUE(flip_colors)){ lc_colors = rev(lc_colors) }
 
+    # create landcover color scheme
+    lc_groups <- factor(c(infest_label, suscep_label, 'Other'), levels = c(infest_label, suscep_label, 'Other'))
+    lc_groups_colors <- c('#FDE725FF', '#440154FF', 'lightgray')
+
     # plot
     lc_plot_timelapse[[i]] <- ggplot(data = df[!is.na(df[,3]),]) +
 
       geom_raster(aes(x, y, fill = landcover_category)) +
 
-      scale_fill_manual(values = c('Invasive' = '#FDE725FF', 'Susceptible' = '#440154FF', 'Other' = 'lightgray'), name = 'Landcover') +
+      scale_fill_manual(limits = lc_groups, values = lc_groups_colors, name = 'Landcover') +
 
       coord_equal() +
 
@@ -254,7 +259,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
     # melt data
     LineGraphData_melt <- with(LineGraphData, data.frame(Year     = c(Year, Year),
-                                                         variable = rep(color_labels, each = nrow(LineGraphData)),
+                                                         variable = rep(line_color_labels, each = nrow(LineGraphData)),
                                                          value    = c(dep_var, dep_var_modified)))
 
 
@@ -265,7 +270,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
       theme(text = element_text(size = font_size)) +
 
-      labs(y = dep_var_label)
+      labs(y = line_plot_axis_label)
 
 
   # if depvar isn't modified, just create line graph of depvar
@@ -286,7 +291,7 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
       theme(legend.position = NULL, text = element_text(size = font_size)) +
 
-      labs(y = dep_var_label)
+      labs(y = line_plot_axis_label)
 
   }
 
@@ -311,7 +316,6 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
     # plot grid
     lc_timelapse_grid <- ggpubr::ggarrange(plotlist = lc_plot_list, common.legend = TRUE, legend = 'right')
-
 
   }
 
@@ -366,7 +370,8 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
 
     sim_plots_results <- list(lc_plot_timelapse               = lc_plot_timelapse,
                               dep_var_plot_timelapse          = dep_var_plot_timelapse,
-                              line_graph                      = LineGraph)
+                              line_graph                      = LineGraph,
+                              line_graph_data                 = LineGraphData)
 
     return(sim_plots_results)
 
@@ -379,7 +384,8 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
                               lc_timelapse_grid               = lc_timelapse_grid,
                               dep_var_plot_timelapse          = dep_var_plot_timelapse,
                               dep_var_timelapse_grid          = dep_var_timelapse_grid,
-                              line_graph                      = LineGraph)
+                              line_graph                      = LineGraph,
+                              line_graph_data                 = LineGraphData)
 
     return(sim_plots_results)
 
@@ -391,7 +397,8 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
     sim_plots_results <- list(lc_plot_timelapse               = lc_plot_timelapse,
                               dep_var_plot_timelapse          = dep_var_plot_timelapse,
                               dep_var_modified_plot_timelapse = dep_var_modified_plot_timelapse,
-                              line_graph                      = LineGraph)
+                              line_graph                      = LineGraph,
+                              line_graph_data                 = LineGraphData_melt)
 
     return(sim_plots_results)
 
@@ -406,7 +413,8 @@ SimulationPlots <- function(landcover_sim_results, depvar_sim_results, infest_va
                               dep_var_timelapse_grid          = dep_var_timelapse_grid,
                               dep_var_modified_plot_timelapse = dep_var_modified_plot_timelapse,
                               dep_var_modified_timelapse_grid = dep_var_modified_timelapse_grid,
-                              line_graph                      = LineGraph)
+                              line_graph                      = LineGraph,
+                              line_graph_data                 = LineGraphData_melt)
 
     return(sim_plots_results)
 
